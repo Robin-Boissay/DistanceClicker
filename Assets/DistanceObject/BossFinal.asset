@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 021427346a2b2224885e6e46c9b01312, type: 3}
+  m_Name: BossFinal
+  m_EditorClassIdentifier: Assembly-CSharp::DistanceObjectSO
+  distanceObjectId: 3
+  nomAffichage: 'Boss final: TrekMorvan'
+  icone: {fileID: 21300000, guid: de87113bfbfe56f4eb298870217dcaec, type: 3}
+  description: 
+  distanceTotale:
+    mantissa: 1
+    exponent: 4
+  recompenseEnMonnaie:
+    mantissa: 10
+    exponent: 3
+  objetSuivant: {fileID: 0}
+  objetPrecedent: {fileID: 11400000, guid: e002fd91d6c71454a8641ad1eb27d818, type: 2}
