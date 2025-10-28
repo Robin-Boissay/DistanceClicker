@@ -1,2 +1,2 @@
 # DistanceClicker
-The futur best game of the year !
+The future best game of the year!

@@ -158,4 +158,20 @@ public class DistanceManager : MonoBehaviour
         AddDistance(distance);
         //clickWholeAreaAnimator.SetTrigger("clickWholeArea");
     }
+    
+    /// <summary>
+    /// Réinitialise le DistanceManager à l'état initial (première cible).
+    /// Utilisé par le ML-Agent pour reset l'environnement.
+    /// </summary>
+    public void ResetToFirstTarget()
+    {
+        if (premiereCible != null)
+        {
+            SetNewTarget(premiereCible);
+        }
+        else
+        {
+            Debug.LogWarning("Impossible de réinitialiser : 'premiereCible' est null.");
+        }
+    }
 }

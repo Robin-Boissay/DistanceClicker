@@ -57,8 +57,8 @@ public class ShopItemUI : MonoBehaviour
 
         int niveauMaxItem = upgradeDefinition.levelMax;
 
-
-        if (niveauMaxItem > 0 && niveauMaxItem <= PlayerDataManager.instance.Data.upgradeLevels[3])
+        // Vérifier le niveau max en utilisant le niveau actuel (currentLevel) au lieu d'accéder directement au dictionnaire
+        if (niveauMaxItem > 0 && currentLevel >= niveauMaxItem)
         {
             nameText.text = upgradeDefinition.nomAffichage + " (Niv.Max)";
             costText.text = "";

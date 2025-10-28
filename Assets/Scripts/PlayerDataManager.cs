@@ -62,9 +62,25 @@ public class PlayerDataManager : MonoBehaviour
 
         Debug.Log("Validation des données du joueur...");
 
+        // Vérifier que shopManager est assigné
+        if (shopManager == null)
+        {
+            Debug.LogWarning("ShopManager n'est pas assigné dans PlayerDataManager. Impossible de valider les upgrades.");
+            return;
+        }
+
+        // Vérifier que allUpgrades existe
+        if (shopManager.allUpgrades == null || shopManager.allUpgrades.Length == 0)
+        {
+            Debug.LogWarning("Aucune upgrade définie dans ShopManager.allUpgrades");
+            return;
+        }
+
         // 1. Valider les niveaux d'améliorations
         foreach (UpgradeDefinitionSO definition in shopManager.allUpgrades)
         {
+            if (definition == null) continue;
+            
             Debug.Log(JsonUtility.ToJson(definition, true));   
             // On vérifie si la clé (l'ID de l'upgrade) existe dans le dictionnaire du joueur.
             if (!data.upgradeLevels.ContainsKey(definition.upgradeIDShop))
@@ -123,13 +139,21 @@ public class PlayerDataManager : MonoBehaviour
         }
     }
 
-    private void CreateNewPlayerData()
+    public void CreateNewPlayerData()
     {
         Data = new PlayerData();
         // Optionnel mais recommandé : sauvegarder immédiatement la nouvelle partie
         // pour qu'un fichier existe dès le début.
         SaveData();
         RecalculateAllStats();
+    }
+    
+    /// <summary>
+    /// Réinitialise complètement les données du joueur (utile pour ML-Agent)
+    /// </summary>
+    public void ResetPlayerData()
+    {
+        CreateNewPlayerData();
     }
 
     // Unity appelle automatiquement cette méthode quand le jeu est fermé
