@@ -80,3 +80,16 @@ results/
 *.onnx.meta
 summaries/
 models/
+
+# Ignorer l'environnement virtuel
+venv310/
+
+# Dossiers et fichiers inutiles
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env/
+.DS_Store
+.idea/
+.vscode/
