@@ -18,7 +18,7 @@ public class DistanceClickerAgent : Agent
     
     [Header("Configuration d'entraînement")]
     [Tooltip("Durée maximale d'un épisode en secondes")]
-    [SerializeField] private float maxEpisodeDuration = 30f;
+    [SerializeField] private float maxEpisodeDuration = 300f;
     
     [Tooltip("Récompense pour avoir complété une cible")]
     [SerializeField] private float targetCompletionReward = 1.0f;
@@ -264,8 +264,26 @@ public class DistanceClickerAgent : Agent
         // 6. Temps restant dans l'épisode
         float timeProgress = episodeTimer / maxEpisodeDuration;
         sensor.AddObservation(Mathf.Clamp01(timeProgress));
+
+        // 7. Infos sur le rond bonus ("circle")
+        bool bonusIsActive = false;
+        float bonusValueNorm = 0f;
+
+        if (ClickCircleSpawner.instance != null)
+        {
+            bonusIsActive = ClickCircleSpawner.instance.bonusCircleActive;
+
+            // Normalise la valeur du bonus pour ne pas exploser les ranges
+            bonusValueNorm = Mathf.Clamp01(ClickCircleSpawner.instance.currentBonusValue / 100000f);
+        }
+
+        // 7a. 1 si un rond bonus est présent à l'écran, sinon 0
+        sensor.AddObservation(bonusIsActive ? 1f : 0f);
+
+        // 7b. Valeur potentielle normalisée du rond
+        sensor.AddObservation(bonusValueNorm);
         
-        // Total observations: 1 + 1 + 1 + 2 + (5 * 3) + 1 = 21 observations
+        // Total observations: 1 + 1 + 1 + 2 + (5 * 3) + 1 + 2 = 23 observations
     }
     
     /// <summary>
@@ -290,10 +308,29 @@ public class DistanceClickerAgent : Agent
         // Exécuter l'action de clic
         if (clickAction == 0)
         {
-            PerformClick();
+            // Cliquer la cible principale
+            PerformClickMainTarget();
             // Petite récompense pour les clics
             AddReward(0.01f);
         }
+
+        else if (clickAction == 1)
+        {
+            // Essayer de cliquer un rond bonus
+            bool clickedBonus = TryClickBonusCircle();
+
+            if (clickedBonus)
+            {
+                // Bonne récompense : il a vraiment capturé un rond bonus valable
+                AddReward(0.1f);
+            }
+            else
+            {
+                // Il a tenté un clic bonus alors qu'il n'y en avait pas
+                AddReward(-0.02f);
+            }
+        }
+        // clickAction == 2 => ne rien faire -> pas de reward immédiate
         
         // Exécuter l'action d'achat d'amélioration
         if (upgradeAction >= 0 && upgradeAction < shopManager.allUpgrades.Length)
@@ -325,6 +362,28 @@ public class DistanceClickerAgent : Agent
         
         // Petite pénalité par step pour encourager l'efficacité
         AddReward(-0.001f);
+    }
+
+    // Clique sur la cible principale (équivalent de ton ancien PerformClick)
+    private void PerformClickMainTarget()
+    {
+        if (distanceManager != null)
+        {
+            distanceManager.ClickAction();
+        }
+    }
+
+    // Essaie de cliquer un rond bonus
+    private bool TryClickBonusCircle()
+    {
+        if (ClickCircleSpawner.instance != null && ClickCircleSpawner.instance.bonusCircleActive)
+        {
+            // On demande au spawner de simuler un clic de joueur sur le rond en cours
+            bool ok = ClickCircleSpawner.instance.TryForceClickActiveCircle();
+            return ok;
+        }
+
+        return false;
     }
     
     /// <summary>
