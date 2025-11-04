@@ -4,6 +4,7 @@ using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using BreakInfinity;
 using System.Collections.Generic;
+using Unity.MLAgents.Policies;
 
 /// <summary>
 /// Agent ML qui apprend à jouer au jeu DistanceClicker de manière optimale.
@@ -291,6 +292,12 @@ public class DistanceClickerAgent : Agent
     /// </summary>
     public override void OnActionReceived(ActionBuffers actions)
     {
+        // Si aucun modèle ML n'est assigné, on ne fait rien
+        if (GetComponent<BehaviorParameters>().Model == null)
+        {
+            return;
+        }
+
         if (playerDataManager == null || playerDataManager.Data == null || 
             distanceManager == null || shopManager == null)
             return;
@@ -299,7 +306,7 @@ public class DistanceClickerAgent : Agent
             return;
         
         // Actions discrètes :
-        // Action 0 : Cliquer (0) ou ne rien faire (1)
+        // Action 0 : Cliquer (0) Cliquer sur un rond bonus (1) ou ne rien faire (2)
         // Action 1 : Acheter une amélioration (0-5, 6 = ne rien acheter)
         
         int clickAction = actions.DiscreteActions[0];
