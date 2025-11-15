@@ -30,6 +30,15 @@ public class DistanceClickerAgent : Agent
     [Header("Contrôle du temps")]
     [Tooltip("Forcer le temps réel (Time.timeScale = 1) pendant l'entraînement")]
     [SerializeField] private bool forceRealtime = false;
+
+    [Tooltip("Forcer l'agent à n'effectuer que 4 actions/sec")]
+    [SerializeField] private float minActionInterval = 0.25f; // 0.25 = 4 actions/sec
+
+    [Tooltip("Probabilité de 'missclick'")]
+    [SerializeField] private float missClickChance = 0.10f; // 0.10 = 10% de clicks ratés
+
+    [Tooltip("Délai avant de prendre une décision (upgrade)")]
+    [SerializeField] private float upgradeDecisionDelay = 0.5f;
     
     // Variables internes
     private float episodeTimer;
@@ -37,7 +46,10 @@ public class DistanceClickerAgent : Agent
     private BigDouble lastDistanceProgress;
     private int targetCompletedThisEpisode;
     private bool isInitialized = false;
-    
+    private float lastTargetChangeTime = -999f;
+    private float lastActionTime = 0f;
+    private float nextUpgradePossibleTime = 0f;
+
     /// <summary>
     /// Awake est appelé quand le script est chargé
     /// </summary>
@@ -283,8 +295,37 @@ public class DistanceClickerAgent : Agent
 
         // 7b. Valeur potentielle normalisée du rond
         sensor.AddObservation(bonusValueNorm);
+
+        // 8. Informations sur la cible actuelle (pour permettre le changement de cible)
+        if (distanceManager != null)
+        {
+            int targetIndex = distanceManager.GetCurrentTargetIndex();
+            int totalTargets = Mathf.Max(1, distanceManager.GetTotalTargetsCount());
+            float progressNorm = distanceManager.GetProgressionNormalized();
+            float rewardNorm = distanceManager.GetRewardNormalized();
+
+            // Index de la cible courante normalisé (0..1)
+            sensor.AddObservation((float)targetIndex / (float)(totalTargets - 1));
+
+            // Nombre total de cibles (utile pour connaître la borne max)
+            sensor.AddObservation(Mathf.Clamp01(totalTargets / 10f));
+
+            // Progression de la cible (0..1)
+            sensor.AddObservation(progressNorm);
+
+            // Récompense relative de la cible (0..1)
+            sensor.AddObservation(rewardNorm);
+        }
+        else
+        {
+            // Si jamais distanceManager est manquant (sécurité)
+            sensor.AddObservation(0f); // Index
+            sensor.AddObservation(0f); // Total
+            sensor.AddObservation(0f); // Progression
+            sensor.AddObservation(0f); // Récompense
+        }
         
-        // Total observations: 1 + 1 + 1 + 2 + (5 * 3) + 1 + 2 = 23 observations
+        // Total observations: 1 + 1 + 1 + 2 + (5 * 3) + 1 + 2 + 4 = 27 observations
     }
     
     /// <summary>
@@ -292,11 +333,12 @@ public class DistanceClickerAgent : Agent
     /// </summary>
     public override void OnActionReceived(ActionBuffers actions)
     {
-        // Si aucun modèle ML n'est assigné, on ne fait rien
-        if (GetComponent<BehaviorParameters>().Model == null)
+        // Limitation de la fréquence d’action (réflexes humains)
+        if (Time.time - lastActionTime < minActionInterval)
         {
-            return;
+            return;  // L'agent doit attendre
         }
+        lastActionTime = Time.time;
 
         if (playerDataManager == null || playerDataManager.Data == null || 
             distanceManager == null || shopManager == null)
@@ -308,9 +350,17 @@ public class DistanceClickerAgent : Agent
         // Actions discrètes :
         // Action 0 : Cliquer (0) Cliquer sur un rond bonus (1) ou ne rien faire (2)
         // Action 1 : Acheter une amélioration (0-5, 6 = ne rien acheter)
-        
+        // Action 2 : 0 = rien, 1 = cible suivante, 2 = cible précédente
         int clickAction = actions.DiscreteActions[0];
         int upgradeAction = actions.DiscreteActions[1];
+        int targetAction = actions.DiscreteActions[2]; 
+
+        // Simuler des erreurs humaines (missclick)
+        if (RandomHumanFail())
+        {
+            // Il a raté son action
+            return;
+        }
         
         // Exécuter l'action de clic
         if (clickAction == 0)
@@ -342,16 +392,15 @@ public class DistanceClickerAgent : Agent
         // Exécuter l'action d'achat d'amélioration
         if (upgradeAction >= 0 && upgradeAction < shopManager.allUpgrades.Length)
         {
-            bool success = TryBuyUpgrade(upgradeAction);
-            if (success)
+            if (Time.time >= nextUpgradePossibleTime)
             {
-                // Récompense pour un achat réussi
-                AddReward(0.2f);
-            }
-            else
-            {
-                // Pénalité pour tentative d'achat invalide
-                AddReward(invalidActionPenalty);
+                bool success = TryBuyUpgrade(upgradeAction);
+
+                if (success) AddReward(0.2f);
+                else AddReward(invalidActionPenalty);
+
+                // Empêche l'IA d'enchaîner les achats trop vite
+                nextUpgradePossibleTime = Time.time + upgradeDecisionDelay;
             }
         }
         
@@ -366,7 +415,38 @@ public class DistanceClickerAgent : Agent
             AddReward(moneyReward);
         }
         lastMoneyAmount = currentMoney;
-        
+
+        // Gestion du changement de cible
+        float targetChangeCooldown = 20f;   // 1,5 sec entre deux changements
+    
+        if (Time.time - lastTargetChangeTime >= targetChangeCooldown)
+        {
+            if (targetAction == 1)
+            {
+                distanceManager.AdvanceToNextTarget();
+                AddReward(-0.01f);  // pénalité un peu plus forte
+                lastTargetChangeTime = Time.time;
+            }
+            else if (targetAction == 2)
+            {
+                distanceManager.AdvanceToPrevTarget();
+                AddReward(-0.01f);
+                lastTargetChangeTime = Time.time;
+            }
+        }
+        else
+        {
+            // Il essaye de spam : punition
+            if (targetAction != 0)
+                AddReward(-0.05f);
+        }
+
+        // Récompense légère pour rester stable
+        if (targetAction == 0)
+        {
+            AddReward(0.002f);
+        }
+
         // Petite pénalité par step pour encourager l'efficacité
         AddReward(-0.001f);
     }
@@ -399,9 +479,17 @@ public class DistanceClickerAgent : Agent
     public override void Heuristic(in ActionBuffers actionsOut)
     {
         var discreteActions = actionsOut.DiscreteActions;
-        
-        // Clic avec la barre d'espace
-        discreteActions[0] = Input.GetKey(KeyCode.Space) ? 0 : 1;
+
+        // Branche 0 : clics
+        // 0 = clic cible principale, 1 = clic rond bonus, 2 = ne rien faire
+
+        discreteActions[0] = 2; // Par défaut, ne rien faire
+
+        // Espace => clic sur la cible principale
+        if (Input.GetKey(KeyCode.Space)) discreteActions[0] = 0;
+
+        // Touche B => clic sur le rond bonus
+        if (Input.GetKey(KeyCode.B)) discreteActions[0] = 1;
         
         // Achat avec les touches 1-5
         discreteActions[1] = 6; // Par défaut, ne rien acheter
@@ -410,6 +498,16 @@ public class DistanceClickerAgent : Agent
         if (Input.GetKeyDown(KeyCode.Alpha3)) discreteActions[1] = 2;
         if (Input.GetKeyDown(KeyCode.Alpha4)) discreteActions[1] = 3;
         if (Input.GetKeyDown(KeyCode.Alpha5)) discreteActions[1] = 4;
+
+        // Branche 2 : changement de cible
+        // 0 = rien, 1 = cible suivante, 2 = cible précédente
+
+        if (discreteActions.Length > 2)
+        {
+            discreteActions[2] = 0; // Par défaut, ne pas changer
+            if (Input.GetKey(KeyCode.RightArrow)) discreteActions[2] = 1;
+            if (Input.GetKey(KeyCode.LeftArrow))  discreteActions[2] = 2;
+        }
     }
     
     /// <summary>
@@ -485,6 +583,11 @@ public class DistanceClickerAgent : Agent
         {
             distanceManager.ClickAction();
         }
+    }
+
+    private bool RandomHumanFail()
+    {
+        return Random.value < missClickChance;
     }
     
     /// <summary>
