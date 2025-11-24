@@ -34,9 +34,6 @@ public class DistanceClickerAgent : Agent
     [Tooltip("Forcer l'agent à n'effectuer que 4 actions/sec")]
     [SerializeField] private float minActionInterval = 0.25f; // 0.25 = 4 actions/sec
 
-    [Tooltip("Probabilité de 'missclick'")]
-    [SerializeField] private float missClickChance = 0.10f; // 0.10 = 10% de clicks ratés
-
     [Tooltip("Délai avant de prendre une décision (upgrade)")]
     [SerializeField] private float upgradeDecisionDelay = 0.5f;
     
@@ -49,14 +46,49 @@ public class DistanceClickerAgent : Agent
     private float lastTargetChangeTime = -999f;
     private float lastActionTime = 0f;
     private float nextUpgradePossibleTime = 0f;
+    private float missClickChance;
 
     /// <summary>
     /// Awake est appelé quand le script est chargé
     /// </summary>
     private new void Awake()
     {
+        // Calculer la probabilité de miss-click en fonction de la taille de l'écran
+        CalculateMissClickChance();
         base.Awake();
-        Debug.Log("=== DistanceClickerAgent Awake() appelé ===");
+        Debug.Log("DistanceClickerAgent Awake() appelé ===");
+    }
+    
+    /// <summary>
+    /// Start est appelé avant la première frame
+    /// </summary>
+    private void CalculateMissClickChance()
+    {
+        // Définir les seuils pour les tailles d'écran et les probabilités
+        const float phoneInches = 7.0f;
+        const float pcInches = 15.0f;
+        const float minChance = 0.10f; // 10% pour téléphone
+        const float maxChance = 0.20f; // 20% pour PC
+
+        float dpi = Screen.dpi; // Est une valeur
+        if (dpi == 0)
+        {
+            dpi = 96f; // DPI standard pour un moniteur PC
+            Debug.LogWarning("Screen.dpi non disponible. Utilisation d'une valeur par défaut (96).");
+        }
+
+        // Calcul de la diagonale en pouces
+        float diagonalPixels = Mathf.Sqrt(Mathf.Pow(Screen.width, 2) + Mathf.Pow(Screen.height, 2));
+        float diagonalInches = diagonalPixels / dpi;
+
+        // Calculer le facteur d'interpolation (t)
+        // t = 0 pour un téléphone (ou plus petit), t = 1 pour un PC (ou plus grand)
+        float t = Mathf.InverseLerp(phoneInches, pcInches, diagonalInches); // inverseLerp fait en sorte que t soit entre 0 et 1
+
+        // Interpolation linéaire de la probabilité
+        missClickChance = Mathf.Lerp(minChance, maxChance, t); 
+
+        Debug.Log($"Diagonale écran: {diagonalInches:F2} pouces. Probabilité de miss-click ajustée à: {missClickChance * 100:F1}%.");
     }
     
     /// <summary>
@@ -64,7 +96,7 @@ public class DistanceClickerAgent : Agent
     /// </summary>
     private void Start()
     {
-        Debug.Log($"=== DistanceClickerAgent Start() appelé - enabled: {enabled}, gameObject.activeInHierarchy: {gameObject.activeInHierarchy} ===");
+        Debug.Log($"DistanceClickerAgent Start() appelé - enabled: {enabled}, gameObject.activeInHierarchy: {gameObject.activeInHierarchy} ===");
         
         // Forcer l'initialisation si elle n'a pas été appelée automatiquement
         // Cela peut arriver si l'agent n'est pas correctement détecté par ML-Agents au démarrage
@@ -80,7 +112,7 @@ public class DistanceClickerAgent : Agent
     /// </summary>
     public override void Initialize()
     {
-        Debug.Log("=== DistanceClickerAgent Initialize() appelé ===");
+        Debug.Log("DistanceClickerAgent Initialize() appelé ===");
         
         // Vérifier que toutes les références sont présentes
         if (distanceManager == null)
