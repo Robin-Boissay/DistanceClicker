@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1058952153848",
+    "project_id": "distanceclicker",
+    "storage_bucket": "distanceclicker.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1058952153848:android:2b0db0f22c4388a406c90d",
+        "android_client_info": {
+          "package_name": "com.KoronaIndustries.DistanceClicker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAt2QZbYYXjNvWqwH1riZq1HdTs3LUARRw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
