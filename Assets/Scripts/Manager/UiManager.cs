@@ -3,10 +3,24 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using BreakInfinity;
+using System.Collections.Generic; // Requis pour List et Dictionary
 
 public class UIManager : MonoBehaviour
 {
     public static UIManager instance;
+
+    [Header("Configuration des Onglets")]
+    [Tooltip("Associe chaque catégorie d'enum à son panneau de contenu (RectTransform)")]
+    public List<ShopTabMapping> tabMappings;
+
+    [Header("Références")]
+    [Tooltip("Le Prefab de ton bouton d'upgrade (avec le script ShopItemUI)")]
+    public GameObject shopItemPrefab;
+    
+    // Dictionnaire pour un accès rapide (Category -> Panel)
+    private Dictionary<ShopCategory, Transform> tabMap;
+
+
     // --- RÉFÉRENCES UI ---
     [Header("UI Monnaie & DPC")]
     public TextMeshProUGUI distanceMonnaieText; // Renommé pour plus de clarté
@@ -22,47 +36,133 @@ public class UIManager : MonoBehaviour
     public Image spriteObjetActuelle;
     public Slider progressBar;
 
-    private void Start()
+    public void Initialize()
     {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+
         UpdateGeneralUI();
+        InitializeShop();
+    }
+
+    void InitializeShop()
+    {
+        // 1. Construire le dictionnaire de "tri"
+        tabMap = new Dictionary<ShopCategory, Transform>();
+        foreach (var mapping in tabMappings)
+        {
+            if (mapping.contentPanel != null)
+            {
+                tabMap[mapping.category] = mapping.contentPanel;
+            }
+        }
+
+        // 2. Récupérer TOUTES les upgrades
+        List<BaseGlobalUpgrade> allUpgrades = StatsManager.Instance.allUpgradesDatabase;
+        if (allUpgrades == null)
+        {
+            Debug.LogError("La base de données d'upgrades est vide dans StatsManager !");
+            return;
+        }
+
+        // 3. Parcourir et "trier" chaque upgrade
+        foreach (BaseGlobalUpgrade upgradeSO in allUpgrades)
+        {
+            if (upgradeSO == null) continue;
+
+            // 4. Trouver le bon panneau de destination
+            if (tabMap.TryGetValue(upgradeSO.shopCategory, out Transform targetPanel))
+            {
+                // 5. Instancier le bouton dans le bon panneau
+                GameObject itemGO = Instantiate(shopItemPrefab, targetPanel);
+
+                // 5.b Informer le ShopManager de cette nouvelle instance, a pour effet d'ajouter l'item à la liste de gestion
+                ShopManager.instance.InstantiateItem(upgradeSO, itemGO.GetComponent<ShopItemUI>());
+                
+                // 6. Initialiser le bouton avec ses données
+                itemGO.GetComponent<ShopItemUI>().Initialize(upgradeSO);
+            }
+            else
+            {
+                Debug.LogWarning($"Aucun panneau UI n'est défini pour la catégorie : {upgradeSO.shopCategory}");
+            }
+        }
     }
 
     private void OnEnable()
     {
         // S'abonne aux événements pour se mettre à jour AUTOMATIQUEMENT
+        StatsManager.ActualiseUiAfterStatsChanged += UpdateGeneralUI;
         DistanceManager.OnNewTargetSet += UpdateTargetInfo;
         DistanceManager.OnDistanceChanged += UpdateProgressBar;
         DistanceManager.OnTargetCompleted += UpdateGeneralUI;
-        ShopManager.OnUpgradeBuyed += UpdateGeneralUI;
-        // On pourrait créer un événement pour la monnaie aussi !
-        // PlayerData.OnCurrencyChanged += UpdateCurrencyUI; 
+        DistanceManager.ActualiseTargetInfos += ActualiseTargetInfos;
+
+        DistanceObjectUpgrade.UpdateUiUnlockNextTargetArrow += UpdateArrowNextPrev;
+        PlayerData.OnDataChanged += UpdateGeneralUI; //Called after the player buyed an upgrade
+
     }
 
     private void OnDisable()
     {
+        StatsManager.ActualiseUiAfterStatsChanged -= UpdateGeneralUI;
         DistanceManager.OnNewTargetSet -= UpdateTargetInfo;
         DistanceManager.OnDistanceChanged -= UpdateProgressBar;
         DistanceManager.OnTargetCompleted -= UpdateGeneralUI;
-        ShopManager.OnUpgradeBuyed -= UpdateGeneralUI;
-        // PlayerData.OnCurrencyChanged -= UpdateCurrencyUI;
+        DistanceManager.ActualiseTargetInfos -= ActualiseTargetInfos;
+
+        DistanceObjectUpgrade.UpdateUiUnlockNextTargetArrow -= UpdateArrowNextPrev;
+        PlayerData.OnDataChanged -= UpdateGeneralUI; //Called after the player buyed an upgrade
     }
 
     // Cette méthode ne devrait être appelée que lorsque les valeurs changent,
     // pas à chaque frame. C'est plus optimisé.
     public void UpdateGeneralUI()
     {
-        distanceMonnaieText.text = "DistanceMonnaie: " + PlayerDataManager.instance.Data.monnaiePrincipale.ToString("F2") + " $"; // Unité plus logique
-        dpcText.text = "DPC: " + NumberFormatter.Format(PlayerDataManager.instance.Data.statsInfo["dpc_base"]);
+        distanceMonnaieText.text = "DistanceMonnaie: " + StatsManager.Instance.currentPlayerData.monnaiePrincipale.ToString("F2") + " $"; // Unité plus logique
+        dpcText.text = "DPC: " + NumberFormatter.Format(StatsManager.Instance.GetStat(StatToAffect.DPC));
+    }
+
+    public void ActualiseTargetInfos()
+    {
+        Debug.Log("Affichage Modifié");
+        //Update la vie total et recompense d'une cible au cas ou c'est une amélioration mastery acheté.
+        BigDouble distanceTotal = DistanceManager.instance.GetDistanceTotalCibleActuelle();
+        BigDouble recompenseEnMonnaie = DistanceManager.instance.GetRewardTotalCibleActuelle();
+
+        totalDistanceText.text = NumberFormatter.Format(distanceTotal);
+        monnaieGagnerObjetActuelle.text = $"+{recompenseEnMonnaie:F2}$";
+
+        UpdateGeneralUI();
     }
 
     public void UpdateTargetInfo(DistanceObjectSO newTarget)
     {
-        totalDistanceText.text = NumberFormatter.Format(newTarget.distanceTotale);
-        monnaieGagnerObjetActuelle.text = $"+{newTarget.recompenseEnMonnaie:F2}$";
+        //New target : icone, objetSuivant, objetPrecedent, nomAffichage
+        //Besoin de distanceTotal, recompenseEnMonnaie
+        BigDouble distanceTotal = DistanceManager.instance.GetDistanceTotalCibleActuelle();
+        BigDouble recompenseEnMonnaie = DistanceManager.instance.GetRewardTotalCibleActuelle();
+
+        totalDistanceText.text = NumberFormatter.Format(distanceTotal);
+        monnaieGagnerObjetActuelle.text = $"+{recompenseEnMonnaie:F2}$";
         spriteObjetActuelle.sprite = newTarget.icone;
         targetNameText.text = newTarget.nomAffichage;
-        btnNextTarget.SetActive(newTarget.objetSuivant != null);
+
+        btnNextTarget.SetActive(newTarget.objetSuivant != null && newTarget.objetSuivant.IsRequirementsMet());
         btnPrevTarget.SetActive(newTarget.objetPrecedent != null);
+    }
+
+    public void UpdateArrowNextPrev()
+    {
+        DistanceObjectSO currentTarget = DistanceManager.instance.GetCurrentTarget();
+        btnNextTarget.SetActive(currentTarget.objetSuivant != null && currentTarget.objetSuivant.IsRequirementsMet());
+        btnPrevTarget.SetActive(currentTarget.objetPrecedent != null);
     }
 
     public void UpdateProgressBar(BigDouble current, BigDouble total)
