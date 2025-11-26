@@ -83,6 +83,15 @@ namespace BreakInfinity
             }
         }
 
+        public double GetMantissa()
+        {
+            return mantissa;
+        }
+        public long GetExponent()
+        {
+            return exponent;
+        }
+
         public static BigDouble Normalize(double mantissa, long exponent)
         {
             if (mantissa >= 1 && mantissa < 10 || !IsFinite(mantissa))
