@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1c1294831673384386ce3be6e312c5a, type: 3}
+  m_Name: MoreDPCUpgrade
+  m_EditorClassIdentifier: Assembly-CSharp::DPCUpgradeSO
+  upgradeID: base_dpc_2
+  infoAffichage: Description de l'upgrade...
+  shopCategory: 0
+  levelMax: 0
+  uiInfo:
+    nameText: Vitesse
+    descriptionText: 
+    effectText: '+ DPC '
+    gainText: 1
+    iconImage: {fileID: 0}
+  conditionUnlock:
+    levelUnlock: 0
+    upgradeDefinition: {fileID: 0}
+  baseCost:
+    mantissa: 5
+    exponent: 1
+  growthCostFactor: 1.08
+  baseStatGain:
+    mantissa: 5
+    exponent: -1
+  statToAffect: 0
+  milestones: []

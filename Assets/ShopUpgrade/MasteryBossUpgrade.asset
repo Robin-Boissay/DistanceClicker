@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ae015afb7117654588d41196e9face4, type: 3}
+  m_Name: MasteryBossUpgrade
+  m_EditorClassIdentifier: Assembly-CSharp::MasteryUpgrade
+  upgradeID: Mastery_boss
+  infoAffichage: Description de l'upgrade...
+  shopCategory: 1
+  levelMax: 50
+  uiInfo:
+    nameText: Mastery Boss
+    descriptionText: 
+    effectText: '* x% vie et gain'
+    gainText: 0
+    iconImage: {fileID: 0}
+  conditionUnlock:
+    levelUnlock: 0
+    upgradeDefinition: {fileID: 0}
+  targetWhereMasteryApplies: {fileID: 11400000, guid: f94f24a91b44961408e7464570a0722d, type: 2}
+  BaseCost:
+    mantissa: 1
+    exponent: 3
+  GrowthCostFactor: 1.1
+  MasteryMultiplier: 1.1
