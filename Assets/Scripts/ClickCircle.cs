@@ -32,15 +32,16 @@ public class ClickCircle : MonoBehaviour
     {
         gameManager = FindFirstObjectByType<GameManager>();
 
-        playerData = PlayerDataManager.instance.Data;
+        playerData = StatsManager.Instance.currentPlayerData;
 
-        minRecompense = new BigDouble(playerData.statsInfo["dpc_base"] * 2);
-        maxRecompense = new BigDouble(playerData.statsInfo["dpc_base"] * 8);
+        minRecompense = new BigDouble(StatsManager.Instance.GetStat(StatToAffect.DPC) * StatsManager.Instance.GetStat(StatToAffect.MinRewardsMultiplierCircle));
+        maxRecompense = new BigDouble(StatsManager.Instance.GetStat(StatToAffect.DPC) * StatsManager.Instance.GetStat(StatToAffect.MaxRewardsMultiplierCircle));
 
         // 1. Détermination de la valeur aléatoire de la récompense
-        int randomRatio = Random.Range(2, 8);
-        recompenseDistance = new BigDouble(playerData.statsInfo["dpc_base"] * randomRatio);
-        
+        float randomRatio = Random.Range(0f, 1f); // génère un float entre 0.00 et 1.00
+        randomRatio = Mathf.Round(randomRatio * 10f) / 10f; // arrondi à 2 décimales
+
+        recompenseDistance = new BigDouble(minRecompense + (maxRecompense - minRecompense) * randomRatio);
         // 2. Détermination du temps de disparition en fonction de la récompense
         // La fonction InverseLerp calcule où se situe recompenseDistance 
         // entre minRecompense et maxRecompense (résultat entre 0 et 1).
@@ -93,12 +94,8 @@ public class ClickCircle : MonoBehaviour
         {
             circleAnimator.SetTrigger("onClick");
 
-            minRecompense = playerData.statsInfo["dpc_base"] * 2;
-            maxRecompense = playerData.statsInfo["dpc_base"] * 8;
-
             // 1. Donne la récompense
             DistanceManager.instance.AddDistance(recompenseDistance);
-
         }
         // 3. Détruit l'objet
         // L'animation s'en occupe avec DestroyCircleWhenClicked.cs
