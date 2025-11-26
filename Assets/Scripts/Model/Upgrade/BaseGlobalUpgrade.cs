@@ -46,7 +46,11 @@ public abstract class BaseGlobalUpgrade : ScriptableObject
         }
 
         PlayerData data = StatsManager.Instance.currentPlayerData;
-        Debug.Log($"Vérification de l'affichage de l'upgrade {upgradeID} avec la condition d'upgrade {conditionUnlock.upgradeDefinition.upgradeID} au niveau {conditionUnlock.levelUnlock}");
-        return conditionUnlock.IsConditionMet(data) && (levelMax == 0 || data.GetUpgradeLevel(upgradeID) < levelMax);
+        
+        //Debug.Log($"Vérification de l'affichage de l'upgrade {upgradeID} avec la condition d'upgrade {conditionUnlock.upgradeDefinition.upgradeID} au niveau {conditionUnlock.levelUnlock}");
+        Debug.Log($"Condition d'affichage : {conditionUnlock.IsConditionMet(data)} et niveau max : {(levelMax == 0 || !(data.GetUpgradeLevel(upgradeID) >= levelMax))}");
+        Debug.Log("levelMax = " + levelMax);
+        Debug.Log("Niveau actuel de l'upgrade dans les données du joueur = " + data.GetUpgradeLevel(upgradeID));
+        return conditionUnlock.IsConditionMet(data) && (levelMax == 0 || !(data.GetUpgradeLevel(upgradeID) >= levelMax));
     }
 }

@@ -12,9 +12,12 @@ public class SpawnRateUpgradeSO : StatsUpgrade
     public override void Purchase(PlayerData data)
     {
         int currentLevel = GetLevel();
-        data.IncrementUpgradeLevel(this.upgradeID);
-        data.SpendCurrency(GetCurrentCost(data));
-        ClickCircleSpawner.Instance.ActualiseSpawnRate();
+
+        if(data.SpendCurrency(GetCurrentCost(data)))
+        {
+            data.IncrementUpgradeLevel(this.upgradeID);
+            ClickCircleSpawner.Instance.ActualiseSpawnRate();
+        }
 
     }
 

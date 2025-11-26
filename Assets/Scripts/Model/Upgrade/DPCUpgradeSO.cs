@@ -12,8 +12,11 @@ public class DPCUpgradeSO : StatsUpgrade
     public override void Purchase(PlayerData data)
     {
         int currentLevel = GetLevel();
-        data.IncrementUpgradeLevel(this.upgradeID);
-        data.SpendCurrency(GetCurrentCost(data));
+
+        if(data.SpendCurrency(GetCurrentCost(data)))
+        {
+            data.IncrementUpgradeLevel(this.upgradeID);
+        }
     }
 
     public override BigDouble GetCurrentCost(PlayerData data)

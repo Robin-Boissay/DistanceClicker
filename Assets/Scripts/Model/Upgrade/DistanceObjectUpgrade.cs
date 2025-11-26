@@ -21,12 +21,13 @@ public class DistanceObjectUpgrade : BaseMasteryUpgrade
     public override void Purchase(PlayerData data)
     {
         int currentLevel = GetLevel();
-        data.IncrementUpgradeLevel("unlock_object_" + targetDistanceObjectToUnlock.distanceObjectId);
-        data.SpendCurrency(GetCurrentCost(data));
-        ChangeVisibilityUpgrade?.Invoke(this);
-        UpdateUiUnlockNextTargetArrow?.Invoke();
+        if(data.SpendCurrency(GetCurrentCost(data)))
+        {
+            data.IncrementUpgradeLevel("unlock_object_" + targetDistanceObjectToUnlock.distanceObjectId);
+            ChangeVisibilityUpgrade?.Invoke(this);
+            UpdateUiUnlockNextTargetArrow?.Invoke();
+        }
     }
-
     public override BigDouble GetCurrentCost(PlayerData data)
     {
         return Cost;
