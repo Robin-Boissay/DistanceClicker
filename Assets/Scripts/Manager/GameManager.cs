@@ -7,11 +7,12 @@ public class GameManager : MonoBehaviour
     public static GameManager instance;
 
     // Références aux autres managers
-    public PlayerDataManager playerDataManager;
+    public SaveManager saveManager;
     public UIManager uiManager;
     public ClickCircleSpawner clickCircleSpawner;
     public ShopManager shopManager;
     public DistanceManager distanceManager;
+    public FirebaseManager firebaseManager;
 
     void Awake()
     {
@@ -25,6 +26,22 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
+
+    private async void Start()
+    {
+        //Initialisation de Firebase en premier
+        await firebaseManager.InitializeAsync();
+
+        
+        // Initialisation du saveManager pour charger les données du joueur
+        await saveManager.Initialize();
+
+        // Initialisation des autres managers
+        shopManager.Initialize();
+        distanceManager.Initialize();
+        uiManager.Initialize();
+        clickCircleSpawner.Initialize();
     }
 
 }
