@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
     public ClickCircleSpawner clickCircleSpawner;
     public ShopManager shopManager;
     public DistanceManager distanceManager;
+    public StatsManager statsManager;
     public FirebaseManager firebaseManager;
 
     void Awake()
@@ -33,6 +34,7 @@ public class GameManager : MonoBehaviour
         //Initialisation de Firebase en premier
         await firebaseManager.InitializeAsync();
 
+        statsManager.Initialize();
         
         // Initialisation du saveManager pour charger les données du joueur
         await saveManager.Initialize();

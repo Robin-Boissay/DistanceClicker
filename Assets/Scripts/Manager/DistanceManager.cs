@@ -1,6 +1,8 @@
 using UnityEngine;
 using System; // Requis pour utiliser les 'Action' (événements)
 using BreakInfinity;
+using System.Collections.Generic;
+
 public class DistanceManager : MonoBehaviour
 {
     #region Singleton
@@ -34,6 +36,12 @@ public class DistanceManager : MonoBehaviour
     public DistanceObjectSO cibleActuelle { get; private set; }
     private BigDouble distanceParcourueSurCibleActuelle;
 
+    private BigDouble DistanceTotalCibleActuelle;
+    private BigDouble RewardTotalCibleActuelle;
+
+    private int MaxLevelMonsterAvaible = 0;
+
+
     // --- Événements pour l'UI ---
     // Ces événements permettent de découpler la logique du jeu de l'affichage (UI).
     // Ton script d'UI s'abonnera à ces événements pour se mettre à jour.
@@ -44,12 +52,12 @@ public class DistanceManager : MonoBehaviour
     // Événement déclenché à chaque fois que la distance progresse.
     // Passe la distance actuelle et la distance totale pour mettre à jour une barre de progression.
     public static event Action<BigDouble, BigDouble> OnDistanceChanged;
-    
+
     // Événement déclenché quand une cible est "vaincue".
     public static event Action OnTargetCompleted;
+    public static event Action ActualiseTargetInfos;
 
-
-    private void Start()
+    public void Initialize()
     {
         // Au démarrage du jeu, on charge la progression sauvegardée s'il y en a une.
         // Pour l'instant, on commence simplement par la première cible.
@@ -69,22 +77,42 @@ public class DistanceManager : MonoBehaviour
     /// <param name="amount">La quantité de distance à ajouter.</param>
     public void AddDistance(BigDouble amount)
     {
-        if (cibleActuelle == null) return; // Sécurité : ne rien faire si aucune cible n'est définie.
+        if (cibleActuelle == null) return;
 
         distanceParcourueSurCibleActuelle += amount;
-        
-        // Déclenche l'événement pour que l'UI (barre de progression, texte) se mette à jour.
-        OnDistanceChanged?.Invoke(distanceParcourueSurCibleActuelle, cibleActuelle.distanceTotale);
 
-        // Vérifie si la cible est complétée.
-        if (distanceParcourueSurCibleActuelle >= cibleActuelle.distanceTotale)
+        // CORRIGÉ : Utilise la distance totale calculée pour l'UI
+        OnDistanceChanged?.Invoke(distanceParcourueSurCibleActuelle, DistanceTotalCibleActuelle);
+
+        // CORRIGÉ : Utilise la distance totale calculée pour la vérification
+        if (distanceParcourueSurCibleActuelle >= DistanceTotalCibleActuelle)
         {
-            Debug.Log(distanceParcourueSurCibleActuelle);
-            Debug.Log(cibleActuelle.distanceTotale);
+            // Le Debug.Log de ton ancien code aurait dû te montrer :
+            // Debug.Log(distanceParcourueSurCibleActuelle); // Ex: 151
+            // Debug.Log(cibleActuelle.distanceTotale);     // Ex: 100 (la base)
+            // Debug.Log(distanceParcourueSurCibleActuelle >= cibleActuelle.distanceTotale); // True (trop tôt !)
 
-            Debug.Log(distanceParcourueSurCibleActuelle >= cibleActuelle.distanceTotale);
             CompleteTarget();
         }
+    }
+
+    public BigDouble GetDistanceTotalCibleActuelle()
+    {
+        return DistanceTotalCibleActuelle;
+    }
+    public BigDouble GetRewardTotalCibleActuelle()
+    {
+        return RewardTotalCibleActuelle;
+    }
+
+    public void SetMaxLevelMonsterAvaible(int level)
+    {
+        MaxLevelMonsterAvaible = level;
+    }
+
+    public int GetMaxLevelMonsterAvaible()
+    {
+        return MaxLevelMonsterAvaible;
     }
 
     /// <summary>
@@ -94,16 +122,30 @@ public class DistanceManager : MonoBehaviour
     {
         // 1. Donner la récompense au joueur.
         Debug.Log($"Cible '{cibleActuelle.nomAffichage}' complétée ! Récompense : {cibleActuelle.recompenseEnMonnaie}.");
-        PlayerDataManager.instance.AddCurency(cibleActuelle.recompenseEnMonnaie);
-        
+
+        StatsManager.Instance.currentPlayerData.AddCurrency(RewardTotalCibleActuelle);
+
         // 2. Déclencher l'événement de complétion (pour sons, effets visuels, etc.).
         OnTargetCompleted?.Invoke();
 
         // 3. Réinitialiser la distance de la cible actuelle pour la farmer à nouveau.
-        distanceParcourueSurCibleActuelle = new BigDouble(0); 
-        
+        distanceParcourueSurCibleActuelle = new BigDouble(0);
+
         // 4. Mettre à jour l'UI pour refléter la réinitialisation.
-        OnDistanceChanged?.Invoke(distanceParcourueSurCibleActuelle, cibleActuelle.distanceTotale);
+        OnDistanceChanged?.Invoke(distanceParcourueSurCibleActuelle, DistanceTotalCibleActuelle);
+    }
+
+    public void ActualiseTargetAfterShopMasteryBuyed()
+    {
+        var Stats = CalculateTargetStats(cibleActuelle);
+
+        DistanceTotalCibleActuelle = Stats.finalDistance;
+        RewardTotalCibleActuelle = Stats.finalReward;
+
+        OnDistanceChanged?.Invoke(distanceParcourueSurCibleActuelle, DistanceTotalCibleActuelle);
+        
+        ActualiseTargetInfos?.Invoke();
+
     }
 
     /// <summary>
@@ -111,20 +153,35 @@ public class DistanceManager : MonoBehaviour
     /// </summary>
     private void SetNewTarget(DistanceObjectSO newTarget)
     {
+        var stats = CalculateTargetStats(newTarget);
+
+        Debug.Log(stats);
+
         cibleActuelle = newTarget;
+
+        DistanceTotalCibleActuelle = stats.finalDistance;
+        RewardTotalCibleActuelle = stats.finalReward;
         distanceParcourueSurCibleActuelle = new BigDouble(0);
-        
+
 
         OnNewTargetSet?.Invoke(cibleActuelle);
-        OnDistanceChanged?.Invoke(distanceParcourueSurCibleActuelle, cibleActuelle.distanceTotale);
+        OnDistanceChanged?.Invoke(distanceParcourueSurCibleActuelle, DistanceTotalCibleActuelle);
+        ShopManager.instance.UpdateMasteryTabForTarget(cibleActuelle); //affiche la bonne upgrade de maitrise du bon objets
     }
+
+    public DistanceObjectSO GetCurrentTarget()
+    {
+        return cibleActuelle;
+    }
+    
+    
 
     /// <summary>
     /// Cette fonction sera appelée par un bouton de l'UI pour passer manuellement à la cible suivante.
     /// </summary>
     public void AdvanceToNextTarget()
     {
-        if (cibleActuelle != null && cibleActuelle.objetSuivant != null)
+        if (cibleActuelle != null && cibleActuelle.objetSuivant != null && cibleActuelle.objetSuivant.IsRequirementsMet())
         {
             // La distance restante sur la cible actuelle est perdue, c'est un choix stratégique.
             SetNewTarget(cibleActuelle.objetSuivant);
@@ -154,8 +211,33 @@ public class DistanceManager : MonoBehaviour
     public void ClickAction()
     {
         // Ajouter la distanceParClic au score
-        BigDouble distance = new BigDouble(PlayerDataManager.instance.Data.statsInfo["dpc_base"]);
+        BigDouble distance = new BigDouble(StatsManager.Instance.GetStat(StatToAffect.DPC));
         AddDistance(distance);
         //clickWholeAreaAnimator.SetTrigger("clickWholeArea");
+    }
+
+    public (BigDouble finalDistance, BigDouble finalReward) CalculateTargetStats(DistanceObjectSO target)
+    {
+        var Data = StatsManager.Instance.currentPlayerData;
+        if (target == null)
+        {
+            Debug.LogError("La cible fournie est nulle.");
+            return (0, 0);
+        }
+
+        Dictionary<string, BaseGlobalUpgrade> ownedUpgrades = StatsManager.Instance.GetUpgradeMap();
+
+        if (ownedUpgrades.TryGetValue("Mastery_" + target.distanceObjectId, out BaseGlobalUpgrade upgradeSO))
+        {
+            Debug.Log($"Amélioration trouvée pour l'ID : {upgradeSO}");
+            MasteryUpgrade masteryUpgrade = upgradeSO as MasteryUpgrade;
+            (BigDouble masteryBonus, BigDouble rewardBonus) = masteryUpgrade.GetTotalMasteryBonus();
+            return (masteryBonus, rewardBonus);
+        }else
+        {
+            Debug.LogError($"Aucune amélioration trouvée pour l'ID : {target.distanceObjectId}");
+
+            return (target.distanceTotale, target.recompenseEnMonnaie);
+        }
     }
 }
