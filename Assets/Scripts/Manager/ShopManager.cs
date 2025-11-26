@@ -1,153 +1,211 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.Linq; // Nécessaire pour l'utilisation de .FirstOrDefault
 using UnityEngine.UI; // Pour Button
-using UnityEngine.EventSystems; 
 using System; // Requis pour utiliser les 'Action' (événements)
 using BreakInfinity;
+
 public class ShopManager : MonoBehaviour
 {
     public static ShopManager instance;
+
+    [Header("Contrôle du Panel Shop")]
     [SerializeField] private GameObject shopPanel; // Référence au GameObject ShopPanel
     [SerializeField] private Button shopButton;    // Référence au bouton qui ouvre/ferme
     [SerializeField] private Animator shopAnimator; // Référence à l'Animator du ShopPanel
-
     private bool isShopOpen = false; // État actuel du shop
 
-    [Header("Références")]
-    public RectTransform shopUIParent; // L'endroit où les items seront affichés dans le Canvas
-    public GameObject shopItemPrefab; // Le Prefab du bouton d'upgrade avec le script ShopItemUI
+    [Header("Références des Onglets")]
+    [SerializeField] private GameObject globalTabPanel; // Le Panel de l'onglet "Global"
+    [SerializeField] private GameObject masteryTabPanel; // Le Panel de l'onglet "Maîtrise"
+    [SerializeField] private Button globalTabButton;     // Le bouton pour afficher l'onglet "Global"
+    [SerializeField] private Button masteryTabButton;    // Le bouton pour afficher l'onglet "Maîtrise"
+    // (Optionnel) Ajoute un TextMeshProUGUI ici si tu veux changer le titre "Maîtrise : Atome"
+
+    [Header("Références d'Instanciation")]
+    // L'endroit où les items "Global" seront affichés
+    [SerializeField] private RectTransform globalUpgradesParent;
+    // L'endroit où les items "Maîtrise" seront affichés
+    [SerializeField] private RectTransform masteryUpgradesParent; 
+    [SerializeField] private GameObject shopItemPrefab; // Le Prefab du bouton d'upgrade
 
     [Header("Définitions d'Upgrades")]
-    // Tableau pour stocker TOUS vos Scriptable Objects
-    public UpgradeDefinitionSO[] allUpgrades; 
+    [Tooltip("Glisse ici TOUS tes ScriptableObjects d'upgrades (Global ET Maîtrise)")]
+    public BaseGlobalUpgrade[] allUpgrades;
 
-    // Maintient la référence entre l'ID de l'upgrade et son affichage UI en scène
-    private Dictionary<int, ShopItemUI> activeShopItems = new Dictionary<int, ShopItemUI>();
+    // Maintient la référence entre l'ID (int) de l'upgrade et son affichage UI
+    private Dictionary<string, ShopItemUI> activeShopItems = new Dictionary<string, ShopItemUI>();
 
-    public static event Action OnUpgradeBuyed;
+    private List<ShopItemUI> allMasteryShopItems = new List<ShopItemUI>();
 
-    void Start()
+
+    public void Initialize()
     {
-        
-        if (shopPanel == null) Debug.LogError("ShopPanel n'est pas assigné dans le ShopManager.");
-        if (shopButton == null) Debug.LogError("ShopButton n'est pas assigné dans le ShopManager.");
-        if (shopAnimator == null) Debug.LogError("ShopAnimator n'est pas assigné dans le ShopManager.");
-
-        if (shopPanel != null)
+        Debug.Log("ShopManager: Démarrage de l'initialisation...");
+        if (instance == null)
         {
-            // Ici, on pourrait désactiver le panel pour qu'il n'intercepte pas les clics
-            // ou le déplacer complètement hors écran si l'Animator ne s'en charge pas dès le début.
-            // L'état "Hidden" de l'Animator gère déjà sa position initiale.
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
         }
 
-        // Attachez l'écouteur de clic au bouton
+         // Validation des références de base
+        if (shopPanel == null) Debug.LogError("ShopPanel n'est pas assigné.");
+        if (shopButton == null) Debug.LogError("ShopButton n'est pas assigné.");
+        if (shopAnimator == null) Debug.LogError("ShopAnimator n'est pas assigné.");
+
+        // Validation des nouvelles références d'onglets
+        if (globalTabPanel == null) Debug.LogError("GlobalTabPanel n'est pas assigné.");
+        if (masteryTabPanel == null) Debug.LogError("MasteryTabPanel n'est pas assigné.");
+        if (globalTabButton == null) Debug.LogError("GlobalTabButton n'est pas assigné.");
+        if (masteryTabButton == null) Debug.LogError("MasteryTabButton n'est pas assigné.");
+        if (globalUpgradesParent == null) Debug.LogError("GlobalUpgradesParent n'est pas assigné.");
+        if (masteryUpgradesParent == null) Debug.LogError("MasteryUpgradesParent n'est pas assigné.");
+
+        // Attachez l'écouteur de clic au bouton principal
         if (shopButton != null)
         {
-            
+            shopButton.onClick.AddListener(ToggleShop);
+        }
+
+        // Attachez les écouteurs pour les boutons d'onglets
+        if (globalTabButton != null)
+        {
+            globalTabButton.onClick.AddListener(ShowGlobalTab); // <-- NOUVEAU
+        }
+        if (masteryTabButton != null)
+        {
+            masteryTabButton.onClick.AddListener(ShowMasteryTab); // <-- NOUVEAU
         }
 
         // Initialisation de la boutique
         InstantiateShopItems();
-        // Optionnel : Mettez à jour périodiquement l'UI si l'argent change
-        //InvokeRepeating(nameof(UpdateAllShopItemsUI), 0.5f, 0.5f);
+        ShowGlobalTab(); // Affiche l'onglet global par défaut
+    }
+
+    private void OnEnable()
+    {
+        DistanceObjectUpgrade.ChangeVisibilityUpgrade += UpdateVisibilityUpgrade;
+        PlayerData.OnDataChanged += UpdateAllShopItemsUI;
+    }
+
+    private void OnDisable()
+    {
+        DistanceObjectUpgrade.ChangeVisibilityUpgrade -= UpdateVisibilityUpgrade;
+        PlayerData.OnDataChanged -= UpdateAllShopItemsUI;
     }
     
+    // --- CONTRÔLE DU PANEL PRINCIPAL ---
+
     public void ToggleShop()
     {
         if (shopAnimator == null) return;
+        isShopOpen = !isShopOpen;
 
         if (isShopOpen)
         {
-            // Le shop est ouvert, on le ferme
-            shopAnimator.SetTrigger("CloseShop");
-            isShopOpen = false;
+            shopAnimator.SetTrigger("OpenShop");
+            UpdateAllShopItemsUI(); // Met à jour l'UI quand on ouvre
         }
         else
         {
-            // Le shop est fermé, on l'ouvre
-            shopAnimator.SetTrigger("OpenShop");
-            isShopOpen = true;
-            UpdateAllShopItemsUI();
+            shopAnimator.SetTrigger("CloseShop");
         }
-        Debug.Log("Shop is now " + (isShopOpen ? "OPEN" : "CLOSED"));
     }
 
-    // --- AFFICHE LES ITEMS AU DÉMARRAGE ---
+    // --- NAVIGATION DES ONGLETS ---
+
+    public void ShowGlobalTab() // <-- NOUVEAU
+    {
+        globalTabPanel.SetActive(true);
+        masteryTabPanel.SetActive(false);
+        // Ici, tu pourrais aussi changer les couleurs des boutons d'onglets
+    }
+
+    public void ShowMasteryTab() // <-- NOUVEAU
+    {
+        globalTabPanel.SetActive(false);
+        masteryTabPanel.SetActive(true);
+        // Ici, tu pourrais aussi changer les couleurs des boutons d'onglets
+    }
+
+    // --- LOGIQUE DU SHOP (ACHAT ET AFFICHAGE) ---
+
     private void InstantiateShopItems()
     {
-        foreach (var definition in allUpgrades)
-        {
-            GameObject itemGO = Instantiate(shopItemPrefab, shopUIParent);
-            ShopItemUI itemUI = itemGO.GetComponent<ShopItemUI>();
-            itemUI.Setup(definition, this);
-            activeShopItems.Add(definition.upgradeIDShop, itemUI);
-        }
+        activeShopItems.Clear(); // Vide le dictionnaire au cas où
+
     }
 
-
-    public bool CanAfford(BigDouble cost)
+    // Fonction d'aide pour instancier (évite la duplication de code)
+    public void InstantiateItem(BaseGlobalUpgrade definition, ShopItemUI itemUI)
     {
-        return PlayerDataManager.instance.Data.monnaiePrincipale >= cost; 
-    }
-
-    public int GetUpgradeLevel(UpgradeDefinitionSO definition)
-    {
-        // Tente de trouver le niveau dans le dictionnaire de sauvegarde.
-        // TryGetValue est plus sûr que d'accéder directement avec [].
-        if (PlayerDataManager.instance.Data.upgradeLevels.TryGetValue(definition.upgradeIDShop, out int level))
+        // Utilise l'upgradeID (int) comme clé
+        if (!activeShopItems.ContainsKey(definition.upgradeID))
         {
-            return level; // Si trouvé, on retourne le niveau sauvegardé.
+            activeShopItems.Add(definition.upgradeID, itemUI);
         }
         else
         {
-            return 0; // Si non trouvé (le joueur ne l'a jamais acheté), le niveau est 0.
+            Debug.LogWarning($"ID d'upgrade en double détecté : {definition.upgradeID}. L'item {definition.name} n'a pas été ajouté.");
         }
     }
-    
-    public void TryPurchase(UpgradeDefinitionSO definition)
-    {
-        // 1. Détermine le niveau actuel et le coût du prochain
-        int currentLevel = GetUpgradeLevel(definition);
-        BigDouble nextCost = definition.CalculerCoutNiveau(currentLevel); // Utilise la fonction corrigée avec BigDouble.Pow
-
-        // 2. Vérification de l'argent
-        if (CanAfford(nextCost)) // J'ai déplacé CanAfford dans le Manager
-        {
-            // 3. Achat réussi : Déduire l'argent
-            PlayerDataManager.instance.RemoveCurrency(nextCost);
-
-            // 4. Mettre à jour le niveau dans PlayerData
-            int newLevel = currentLevel + 1;
-            // On sauvegarde le nouveau niveau
-            PlayerDataManager.instance.Data.upgradeLevels[definition.upgradeIDShop] = newLevel;
-
-            // 5. Mettre à jour l'affichage de l'item qui vient d'être acheté
-            activeShopItems[definition.upgradeIDShop].UpdateUI(); 
-            
-            // 6. DÉCLENCHER L'ÉVÉNEMENT
-            // C'est la partie la plus importante.
-            // Le PlayerDataManager écoute cet événement et va appeler RecalculateAllStats()
-            OnUpgradeBuyed?.Invoke(); 
-            
-            // 7. Mettre à jour tous les autres items (pour leur état achetable/non achetable)
-            UpdateAllShopItemsUI();
-        }
-        else
-        {
-            Debug.Log("Pas assez d'argent pour : " + definition.nomAffichage);
-        }
-    }
-
-    // Mettre à jour l'état de tous les boutons (pour l'activation/désactivation)
     public void UpdateAllShopItemsUI()
     {
-        foreach (var item in activeShopItems)
+        // 'foreach' sur les Valeurs du dictionnaire est plus direct
+        foreach (ShopItemUI itemUI in activeShopItems.Values)
         {
-            ShopItemUI ui = item.Value;
-
-            int currentLevel = GetUpgradeLevel(ui.GetUpgradeDefinition());
-            ui.UpdateUI();
+            // UpdateUI() devrait s'en charger lui-même.
+            itemUI.RefreshUI();
         }
+    }
+
+    /// <summary>
+    /// Met à jour l'onglet Maîtrise pour n'afficher que les améliorations
+    /// de la cible actuellement active.
+    /// </summary>
+    /// <param name="activeTarget">La définition de la cible actuelle (ex: Atome_Target)</param>
+    public void UpdateMasteryTabForTarget(DistanceObjectSO activeTarget)
+    {
+        if (activeTarget == null) return;
+
+        // Utilisez (true) pour inclure les objets inactifs dans la recherche,
+        // sinon vous ne pourrez jamais réactiver un objet désactivé !
+        foreach (ShopItemUI itemUI in masteryTabPanel.GetComponentsInChildren<ShopItemUI>(true))
+        {
+            // On vérifie si l'item est bien une amélioration de Maîtrise
+            if (itemUI.GetCurrentUpgrade() is BaseMasteryUpgrade distanceUpgrade)
+            {
+                // Si oui, on vérifie si elle s'applique à la cible active (en utilisant le paramètre)
+                bool shouldBeActive = distanceUpgrade.targetWhereMasteryApplies == activeTarget && distanceUpgrade.GetIsShown();
+                itemUI.gameObject.SetActive(shouldBeActive);
+            }
+            else
+            {
+                // Si ce n'est PAS une amélioration de Maîtrise, on la cache TOUJOURS
+                itemUI.gameObject.SetActive(false);
+            }
+        }
+
+        // Change le titre de l'onglet (Exemple, tu auras besoin d'une référence Text)
+        // masteryTabTitle.text = "Maîtrise : " + activeTarget.nomAffichage;
+    }
+
+    public ShopItemUI GetShopItemUIByID(string upgradeID)
+    {
+        if (activeShopItems.TryGetValue(upgradeID, out ShopItemUI itemUI))
+        {
+            return itemUI;
+        }
+        Debug.LogWarning($"Aucun ShopItemUI trouvé pour l'ID d'upgrade : {upgradeID}");
+        return null;
+    }
+    
+    public void UpdateVisibilityUpgrade(BaseGlobalUpgrade upgrade)
+    {
+        Debug.Log($"Mise à jour de la visibilité de l'upgrade {upgrade.upgradeID} : isShown = {upgrade.GetIsShown()}");
+        ShopCategory category = upgrade.shopCategory;
+        GetShopItemUIByID(upgrade.upgradeID).gameObject.SetActive(upgrade.GetIsShown());
     }
 }

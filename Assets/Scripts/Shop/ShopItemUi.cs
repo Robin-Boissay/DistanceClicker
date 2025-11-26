@@ -1,86 +1,108 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro; // N'oubliez pas ceci pour utiliser TextMeshPro
+using TMPro;
 using BreakInfinity;
-using System;
+
 public class ShopItemUI : MonoBehaviour
 {
-    // Références à l'UI
-    [Header("UI References")]
+    [Header("Références UI")]
     public TextMeshProUGUI nameText;
-    public TextMeshProUGUI gainText;
-
+    public TextMeshProUGUI descriptionText;
     public TextMeshProUGUI costText;
-    public Button buyButton;
+    public TextMeshProUGUI levelText;
+    public TextMeshProUGUI effectText;
+    public Image iconImage;
+    public Button purchaseButton;
 
-    // Références de Données (liées au Scriptable Object)
-    private UpgradeDefinitionSO upgradeDefinition;
-    private ShopManager shopManager;
+    private BaseGlobalUpgrade currentUpgrade;
+    private PlayerData playerData;
 
-    // --- 1. Initialisation de l'affichage ---
-    public void Setup(UpgradeDefinitionSO definition, ShopManager manager)
+    /// <summary>
+    /// Appelé par le ShopUIManager lors de l'instanciation.
+    /// </summary>
+    public void Initialize(BaseGlobalUpgrade upgradeSO)
     {
-        upgradeDefinition = definition;
-        shopManager = manager;
+        currentUpgrade = upgradeSO;
+        playerData = StatsManager.Instance.currentPlayerData;
 
-        // Met en place l'événement de clic du bouton
-        // On retire d'abord les écouteurs précédents pour éviter les doubles appels
-        buyButton.onClick.RemoveAllListeners();
-        buyButton.onClick.AddListener(OnBuyButtonClicked);
+        // Lier le clic du bouton
+        purchaseButton.onClick.AddListener(OnPurchaseClicked);
 
-        // Met à jour l'affichage pour la première fois
-        UpdateUI();
+        // S'abonner aux mises à jour (pour le coût, le niveau, etc.)
+        StatsManager.Instance.OnStatsUpdated += RefreshUI;
+        // On rafraîchit aussi si la monnaie change
+        PlayerData.OnDataChanged += RefreshUI;
+
+        // Remplir les infos statiques
+        nameText.text = currentUpgrade.uiInfo.nameText;
+        //iconImage.sprite = currentUpgrade.uiInfo.iconImage;
+        effectText.text = currentUpgrade.uiInfo.effectText;
+        if (currentUpgrade.uiInfo.gainText && currentUpgrade is StatsUpgrade currentStatUpgrade)
+        {
+
+            effectText.text += NumberFormatter.Format(currentStatUpgrade.baseStatGain);
+        }
+
+        RefreshUI();
     }
-    public UpgradeDefinitionSO GetUpgradeDefinition()
+    
+    public BaseGlobalUpgrade GetCurrentUpgrade()
     {
-        return upgradeDefinition;
+        return currentUpgrade;
     }
 
-    // --- 2. Mise à jour de l'affichage (Nom, Coût, État du bouton) ---
-    public void UpdateUI()
+    void OnDestroy()
     {
-        int currentLevel = shopManager.GetUpgradeLevel(upgradeDefinition);
-        BigDouble nextCost = upgradeDefinition.CalculerCoutNiveau(currentLevel);
+        // Se désabonner pour éviter les erreurs
+        if (StatsManager.Instance != null)
+        {
+            StatsManager.Instance.OnStatsUpdated -= RefreshUI;
+        }
+        if (playerData != null)
+        {
+            PlayerData.OnDataChanged -= RefreshUI;
+        }
+    }
+    /// <summary>
+    /// Met à jour tous les textes dynamiques (coût, niveau, etc.)
+    /// </summary>
+    public void RefreshUI()
+    {
+        playerData = StatsManager.Instance.currentPlayerData;
 
-        nameText.text = upgradeDefinition.nomAffichage + " (Niv. " + currentLevel + ")";
-        costText.text = nextCost.ToString("F2") + " $"; // Affiche le coût avec 2 décimale
-        if (upgradeDefinition.upgradeID.StartsWith("spawn_rate_circle"))
-        {
-            gainText.text = upgradeDefinition.infoAffichage + Math.Round(upgradeDefinition.valeurAjouteeParNiveau.ToDouble(),1) + "s";
-        }
-        else
-        {
-            gainText.text = upgradeDefinition.infoAffichage + " " + NumberFormatter.Format(upgradeDefinition.valeurAjouteeParNiveau);
-        }
+        if (currentUpgrade == null || playerData == null) return;
         
-        gainText.color = new Color(0.3f, 0.3f, 0.3f, 1.0f);;
+        BigDouble cost = currentUpgrade.GetCurrentCost(playerData);
 
-        int niveauMaxItem = upgradeDefinition.levelMax;
-
-
-        if (niveauMaxItem > 0 && niveauMaxItem <= PlayerDataManager.instance.Data.upgradeLevels[3])
-        {
-            nameText.text = upgradeDefinition.nomAffichage + " (Niv.Max)";
-            costText.text = "";
-            gainText.text = "";
-            buyButton.interactable = false; // Active/désactive le bouton
-            costText.color = Color.red;
-        }
-        else
-        {
-
-            bool canAfford = shopManager.CanAfford(nextCost);
-            buyButton.interactable = canAfford; // Active/désactive le bouton
-            costText.color = canAfford ? Color.darkGray : Color.red;
-        }
+        // Remplir les infos dynamiques
+        //descriptionText.text = currentUpgrade.infoAffichage; // (Tu peux aussi le changer)
+        costText.text = $"Coût : {NumberFormatter.Format(cost)}"; // Formatte le nombre
+        levelText.text = playerData.GetUpgradeLevel(currentUpgrade.upgradeID).ToString();
         
         
+        // Gérer l'état du bouton
+        bool canAfford = playerData.monnaiePrincipale >= cost;
+        bool prerequisitesMet = currentUpgrade.IsRequirementsMet();
+
+        purchaseButton.interactable = canAfford && prerequisitesMet;
+
+        Debug.Log($"Mise à jour de l'UI pour l'upgrade {currentUpgrade.GetIsShown()}}}");
+
+         if (this.GetCurrentUpgrade() is BaseMasteryUpgrade distanceUpgrade)
+        {
+            // Si oui, on vérifie si elle s'applique à la cible active (en utilisant le paramètre)
+            bool shouldBeActive = distanceUpgrade.targetWhereMasteryApplies == DistanceManager.instance.GetCurrentTarget() && distanceUpgrade.GetIsShown();
+            this.gameObject.SetActive(shouldBeActive);
+        }
     }
 
     // --- 3. Gestion du Clic ---
-    private void OnBuyButtonClicked()
+    private void OnPurchaseClicked()
     {
-        // Tente d'acheter l'upgrade via le ShopManager (le contrôleur)
-        shopManager.TryPurchase(upgradeDefinition); 
+        playerData = StatsManager.Instance.currentPlayerData;
+        if (currentUpgrade.IsRequirementsMet())
+        {
+            currentUpgrade.Purchase(playerData);
+        }
     }
 }
