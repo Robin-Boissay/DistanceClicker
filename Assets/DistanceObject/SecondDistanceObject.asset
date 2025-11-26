@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 021427346a2b2224885e6e46c9b01312, type: 3}
   m_Name: SecondDistanceObject
   m_EditorClassIdentifier: Assembly-CSharp::DistanceObjectSO
-  distanceObjectId: 2
+  distanceObjectId: molecule
   nomAffichage: "Mol\xE9cule"
   icone: {fileID: 21300000, guid: 65ee45e13ebccaa4780dceeb27da7384, type: 3}
   description: 

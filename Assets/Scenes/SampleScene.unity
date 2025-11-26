@@ -4081,9 +4081,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1500020510}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 887f79363b1b54749873336d736341cf, type: 3}
+  m_Script: {fileID: 11500000, guid: 93d9397cc7aa4df43a105072c7ab8f85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LeaderboardUI
+  leaderboardText: {fileID: 861893618}
 --- !u!114 &1500020513
 MonoBehaviour:
   m_ObjectHideFlags: 0
