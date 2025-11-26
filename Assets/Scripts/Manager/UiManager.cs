@@ -125,7 +125,7 @@ public class UIManager : MonoBehaviour
     // pas à chaque frame. C'est plus optimisé.
     public void UpdateGeneralUI()
     {
-        distanceMonnaieText.text = "DistanceMonnaie: " + StatsManager.Instance.currentPlayerData.monnaiePrincipale.ToString("F2") + " $"; // Unité plus logique
+        distanceMonnaieText.text = "DistanceMonnaie: " + NumberFormatter.Format(StatsManager.Instance.currentPlayerData.monnaiePrincipale) + " $"; // Unité plus logique
         dpcText.text = "DPC: " + NumberFormatter.Format(StatsManager.Instance.GetStat(StatToAffect.DPC));
     }
 
@@ -134,7 +134,7 @@ public class UIManager : MonoBehaviour
         Debug.Log("Affichage Modifié");
         //Update la vie total et recompense d'une cible au cas ou c'est une amélioration mastery acheté.
         BigDouble distanceTotal = DistanceManager.instance.GetDistanceTotalCibleActuelle();
-        BigDouble recompenseEnMonnaie = DistanceManager.instance.GetRewardTotalCibleActuelle();
+        string recompenseEnMonnaie = NumberFormatter.Format(DistanceManager.instance.GetRewardTotalCibleActuelle());
 
         totalDistanceText.text = NumberFormatter.Format(distanceTotal);
         monnaieGagnerObjetActuelle.text = $"+{recompenseEnMonnaie:F2}$";
@@ -147,7 +147,7 @@ public class UIManager : MonoBehaviour
         //New target : icone, objetSuivant, objetPrecedent, nomAffichage
         //Besoin de distanceTotal, recompenseEnMonnaie
         BigDouble distanceTotal = DistanceManager.instance.GetDistanceTotalCibleActuelle();
-        BigDouble recompenseEnMonnaie = DistanceManager.instance.GetRewardTotalCibleActuelle();
+        string recompenseEnMonnaie = NumberFormatter.Format(DistanceManager.instance.GetRewardTotalCibleActuelle());
 
         totalDistanceText.text = NumberFormatter.Format(distanceTotal);
         monnaieGagnerObjetActuelle.text = $"+{recompenseEnMonnaie:F2}$";

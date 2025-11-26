@@ -39,8 +39,19 @@ public class ShopItemUI : MonoBehaviour
         effectText.text = currentUpgrade.uiInfo.effectText;
         if (currentUpgrade.uiInfo.gainText && currentUpgrade is StatsUpgrade currentStatUpgrade)
         {
-
-            effectText.text += NumberFormatter.Format(currentStatUpgrade.baseStatGain);
+            if(currentStatUpgrade.statToAffect == StatToAffect.DPC)
+                effectText.text = " DPC + " + NumberFormatter.Format(currentStatUpgrade.baseStatGain);
+            else if(currentStatUpgrade.statToAffect == StatToAffect.DPS)
+                effectText.text = " DPS + " + NumberFormatter.Format(currentStatUpgrade.baseStatGain);
+            else if(currentStatUpgrade.statToAffect == StatToAffect.MaxRewardsMultiplierCircle)
+                effectText.text = StatsManager.Instance.GetStat(StatToAffect.MaxRewardsMultiplierCircle) + " -> " + (StatsManager.Instance.GetStat(StatToAffect.MaxRewardsMultiplierCircle) + currentStatUpgrade.baseStatGain);
+            else if(currentStatUpgrade.statToAffect == StatToAffect.MinRewardsMultiplierCircle)
+                effectText.text = StatsManager.Instance.GetStat(StatToAffect.MinRewardsMultiplierCircle) + " -> " + (StatsManager.Instance.GetStat(StatToAffect.MinRewardsMultiplierCircle) + currentStatUpgrade.baseStatGain);
+            else if(currentStatUpgrade.statToAffect == StatToAffect.SpawnRateCircle)
+                effectText.text = " SpawnRate -= " + currentStatUpgrade.baseStatGain.GetMantissa().ToString("F2") + "s";
+            else{
+                effectText.text += NumberFormatter.Format(currentStatUpgrade.baseStatGain);
+            }
         }
 
         RefreshUI();
@@ -76,9 +87,16 @@ public class ShopItemUI : MonoBehaviour
 
         // Remplir les infos dynamiques
         //descriptionText.text = currentUpgrade.infoAffichage; // (Tu peux aussi le changer)
-        costText.text = $"Coût : {NumberFormatter.Format(cost)}"; // Formatte le nombre
-        levelText.text = playerData.GetUpgradeLevel(currentUpgrade.upgradeID).ToString();
+        costText.text = $"{NumberFormatter.Format(cost)}$"; // Formatte le nombre
+        levelText.text = $"Lvl. {playerData.GetUpgradeLevel(currentUpgrade.upgradeID).ToString()}";
         
+        if (currentUpgrade.uiInfo.gainText && currentUpgrade is StatsUpgrade currentStatUpgrade)
+        {
+            if(currentStatUpgrade.statToAffect == StatToAffect.MaxRewardsMultiplierCircle)
+                effectText.text = StatsManager.Instance.GetStat(StatToAffect.MaxRewardsMultiplierCircle) + " -> " + (StatsManager.Instance.GetStat(StatToAffect.MaxRewardsMultiplierCircle) + currentStatUpgrade.baseStatGain);
+            else if(currentStatUpgrade.statToAffect == StatToAffect.MinRewardsMultiplierCircle)
+                effectText.text = StatsManager.Instance.GetStat(StatToAffect.MinRewardsMultiplierCircle) + " -> " + (StatsManager.Instance.GetStat(StatToAffect.MinRewardsMultiplierCircle) + currentStatUpgrade.baseStatGain);
+        }
         
         // Gérer l'état du bouton
         bool canAfford = playerData.monnaiePrincipale >= cost;

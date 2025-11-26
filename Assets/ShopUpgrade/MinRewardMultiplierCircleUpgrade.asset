@@ -17,9 +17,9 @@ MonoBehaviour:
   shopCategory: 0
   levelMax: 20
   uiInfo:
-    nameText: Min reward multiplier (base *2)
+    nameText: Min reward multiplier
     descriptionText: 
-    effectText: + x Min reward multiplier
+    effectText: 
     gainText: 1
     iconImage: {fileID: 0}
   conditionUnlock:
@@ -28,7 +28,7 @@ MonoBehaviour:
   baseCost:
     mantissa: 1
     exponent: 2
-  growthCostFactor: 2
+  growthCostFactor: 1.5
   baseStatGain:
     mantissa: 2
     exponent: -1
