@@ -29,5 +29,6 @@ MonoBehaviour:
   BaseCost:
     mantissa: 10
     exponent: 0
-  GrowthCostFactor: 1.1
-  MasteryMultiplier: 1.1
+  GrowthCostFactor: 1.12
+  MasteryDistanceMultiplier: 1.1
+  MasteryRewardMultiplier: 1.11

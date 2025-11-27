@@ -13,7 +13,8 @@ public class MasteryUpgrade : BaseMasteryUpgrade
     public BigDouble BaseCost;
 
     public float GrowthCostFactor = 1.1f;
-    public float MasteryMultiplier = 1.1f;
+    public float MasteryDistanceMultiplier = 1.1f;
+    public float MasteryRewardMultiplier = 1.1f;
 
     public override void Purchase(PlayerData data)
     {
@@ -49,8 +50,8 @@ public class MasteryUpgrade : BaseMasteryUpgrade
     public (BigDouble, BigDouble) GetTotalMasteryBonus()
     {
         int level = GetLevel();
-        BigDouble DistanceTotalAfterMastery = targetWhereMasteryApplies.distanceTotale * BigDouble.Pow(MasteryMultiplier, level);
-        BigDouble RewardTotalAfterMastery = targetWhereMasteryApplies.recompenseEnMonnaie * BigDouble.Pow(MasteryMultiplier, level);
+        BigDouble DistanceTotalAfterMastery = targetWhereMasteryApplies.distanceTotale * BigDouble.Pow(MasteryDistanceMultiplier, level);
+        BigDouble RewardTotalAfterMastery = targetWhereMasteryApplies.recompenseEnMonnaie * BigDouble.Pow(MasteryRewardMultiplier, level);
         return (DistanceTotalAfterMastery, RewardTotalAfterMastery);
     }
     

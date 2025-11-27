@@ -28,7 +28,7 @@ MonoBehaviour:
   baseCost:
     mantissa: 5
     exponent: 1
-  growthCostFactor: 1.1
+  growthCostFactor: 1.3
   baseStatGain:
     mantissa: 1
     exponent: -1

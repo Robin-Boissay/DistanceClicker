@@ -93,7 +93,7 @@ public class LeaderboardManager : MonoBehaviour
             Query top10Query = db.Collection("users")
                 .OrderByDescending("monnaiePrincipale.exponent")
                 .OrderByDescending("monnaiePrincipale.mantissa")
-                .Limit(10);
+                .Limit(20);
 
             QuerySnapshot snapshot = await top10Query.GetSnapshotAsync();
 
