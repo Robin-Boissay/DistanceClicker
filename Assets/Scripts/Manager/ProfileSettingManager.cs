@@ -88,7 +88,7 @@ public class ProfileSettingManager : MonoBehaviour
             {
                 // Succès Auth -> Maintenant on met à jour la Database (Important pour Distance Clicker)
                 await SyncNameToDatabase(user.UserId, _pseudo);
-                StatsManager.Instance.playerData.username = _pseudo; // Met à jour localement aussi
+                StatsManager.Instance.currentPlayerData.username = _pseudo; // Met à jour localement aussi
                 textFeedback.text = "Pseudo changé !";
                 textFeedback.color = Color.green;
                 
