@@ -42,7 +42,6 @@ public class SaveManager : MonoBehaviour
         // 2. Charger les données du joueur (en utilisant la nouvelle fonction)
         //Debug.Log("Firebase prêt. Chargement des données joueur...");
         
-        // On suppose que cette fonction est dans ton SaveManager
         PlayerData loadedData = await LoadGameFromFirestore();
 
         StatsManager.Instance.InitializeData(loadedData);
@@ -215,7 +214,7 @@ public class SaveManager : MonoBehaviour
                 // ----- CAS 1: JOUEUR EXISTANT -----
                 Debug.Log("Données trouvées ! Chargement de la progression.");
                 
-                PlayerData loadedData = new PlayerData();
+                PlayerData loadedData = new PlayerData(needCreateUsername: false);
                 Dictionary<string, object> data = snapshot.ToDictionary();
                 
                 // Cette ligne causait la première erreur

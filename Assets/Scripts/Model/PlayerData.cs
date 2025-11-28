@@ -8,6 +8,8 @@ using Firebase.Firestore;
 public class PlayerData
 {
     private int identifiantJoueur;
+    private string username;
+
     public BigDouble monnaiePrincipale;
 
     private Dictionary<string, int> upgradeLevels;
@@ -16,10 +18,14 @@ public class PlayerData
     public static event Action OnDataChanged;
 
     // --- Constructeur ---
-    public PlayerData()
+    public PlayerData(bool needCreateUsername = true)
     {
         monnaiePrincipale = new BigDouble(0);
         identifiantJoueur = 0;
+        if (needCreateUsername)
+        {
+            username = NameGenerator.GenerateRandomName();
+        }
         upgradeLevels = new Dictionary<string, int>();
     }
 
@@ -109,12 +115,13 @@ public class PlayerData
             // Tu peux aussi ajouter "derniereConnexion" ici
         };
 
+
         // 3. Créer l'objet principal à envoyer
         Dictionary<string, object> data = new Dictionary<string, object>
         {
             { "monnaiePrincipale", monnaieData },
             { "metadata", metadata },
-            
+            { "username", username },
             // C'est là que c'est magique :
             // Pas besoin de listes ! On envoie le Dictionnaire directement.
             { "upgrades", upgradeLevels } 
@@ -164,6 +171,40 @@ public class PlayerData
                 }
             }
         }
+
+        string finalName = "";
+
+        // ÉTAPE A : Vérifier le profil Auth (Priorité Max)
+        // On récupère l'instance Auth directement
+        var userAuth = FirebaseManager.Instance.auth.CurrentUser;
+        
+        if (userAuth != null && !string.IsNullOrEmpty(userAuth.DisplayName))
+        {
+            finalName = userAuth.DisplayName;
+        }
+
+        // ÉTAPE B : Si Auth n'a rien donné, vérifier la Sauvegarde Firestore
+        if (string.IsNullOrEmpty(finalName)) 
+        {
+            if (data.TryGetValue("username", out object usernameObj))
+            {
+                string dbName = usernameObj as string;
+                if (!string.IsNullOrEmpty(dbName))
+                {
+                    finalName = dbName;
+                }
+            }
+        }
+
+        // ÉTAPE C : Si toujours rien (nouveau compte sans nom), Random
+        if (string.IsNullOrEmpty(finalName))
+        {
+            // Attention : Utilise la version corrigée avec System.Random
+            finalName = NameGenerator.GenerateRandomName();
+        }
+
+        // Assignation finale
+        this.username = finalName;
         
         // 3. Les métadonnées (derniereSauvegarde, etc.) n'ont généralement
         // pas besoin d'être chargées dans le jeu, sauf si tu veux
