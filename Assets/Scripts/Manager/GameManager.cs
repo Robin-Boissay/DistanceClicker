@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
     public StatsManager statsManager;
     public FirebaseManager firebaseManager;
     public LeaderboardManager leaderboardManager;
+    public ProfileSettingManager profileSettingManager;
 
     void Awake()
     {
@@ -46,6 +47,7 @@ public class GameManager : MonoBehaviour
         uiManager.Initialize();
         clickCircleSpawner.Initialize();
         leaderboardManager.Initialize();
+        profileSettingManager.Initialize();
     }
 
 }
