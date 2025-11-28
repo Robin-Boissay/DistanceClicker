@@ -19,14 +19,14 @@ public class MasteryUpgrade : BaseMasteryUpgrade
     public override void Purchase(PlayerData data)
     {
         int currentLevel = GetLevel();
-        if(data.SpendCurrency(GetCurrentCost(data)))
+        if(data.SpendCurrency(GetCurrentCost()))
         {
             data.IncrementUpgradeLevel(this.upgradeID);
             DistanceManager.instance.ActualiseTargetAfterShopMasteryBuyed();
         }
     }
 
-    public override BigDouble GetCurrentCost(PlayerData data)
+    public override BigDouble GetCurrentCost()
     {
         return BaseCost * BigDouble.Pow(GrowthCostFactor, GetLevel());
     }

@@ -13,13 +13,13 @@ public class DPCUpgradeSO : StatsUpgrade
     {
         int currentLevel = GetLevel();
 
-        if(data.SpendCurrency(GetCurrentCost(data)))
+        if(data.SpendCurrency(GetCurrentCost()))
         {
             data.IncrementUpgradeLevel(this.upgradeID);
         }
     }
 
-    public override BigDouble GetCurrentCost(PlayerData data)
+    public override BigDouble GetCurrentCost()
     {
         int currentLevel = GetLevel();
         if (currentLevel >= 0)
@@ -55,11 +55,10 @@ public class DPCUpgradeSO : StatsUpgrade
 
         PlayerData data = StatsManager.Instance.currentPlayerData;
 
-        if (levelMax == 0 && GetCurrentCost(data) <= data.monnaiePrincipale)
+        if (levelMax == 0 && GetCurrentCost() <= data.monnaiePrincipale)
         {
-
             return true;
         }
-        return GetCurrentCost(data) <= data.monnaiePrincipale  && currentLevel < levelMax;
+        return GetCurrentCost() <= data.monnaiePrincipale  && currentLevel < levelMax;
     }
 }

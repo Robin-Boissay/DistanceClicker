@@ -95,6 +95,8 @@ public class ClickCircle : MonoBehaviour
             circleAnimator.SetTrigger("onClick");
 
             // 1. Donne la récompense
+            StatsManager.Instance.currentPlayerData.AddExperience(recompenseDistance);
+            
             DistanceManager.instance.AddDistance(recompenseDistance);
         }
         // 3. Détruit l'objet

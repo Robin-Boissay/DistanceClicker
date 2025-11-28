@@ -33,7 +33,7 @@ public class IdleManager : MonoBehaviour
 
     public void Initialize()
     {
-       ActualDPS = StatsManager.Instance.calculatedStats[StatToAffect.DPS];
+       ActualDPS = StatsManager.Instance.calculatedStats[StatToAffect.DPS] * (1 + StatsManager.Instance.GetStat(StatToAffect.EnchenteurMultiplier)/100);
     }
 
     /// <summary>
@@ -48,6 +48,6 @@ public class IdleManager : MonoBehaviour
     public void ActualiseDPS()
     {
         Debug.Log("IdleManager: Actualisation du DPS depuis StatsManager.");
-        ActualDPS = StatsManager.Instance.calculatedStats[StatToAffect.DPS];
+        ActualDPS = StatsManager.Instance.calculatedStats[StatToAffect.DPS] * (1 + StatsManager.Instance.GetStat(StatToAffect.EnchenteurMultiplier)/100);
     }
 }

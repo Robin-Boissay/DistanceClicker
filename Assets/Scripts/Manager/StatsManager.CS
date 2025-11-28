@@ -10,7 +10,8 @@ public enum StatToAffect
     DPS,
     SpawnRateCircle,
     MinRewardsMultiplierCircle,
-    MaxRewardsMultiplierCircle
+    MaxRewardsMultiplierCircle,
+    EnchenteurMultiplier
 }
 
 public class StatsManager : MonoBehaviour
@@ -93,6 +94,8 @@ public class StatsManager : MonoBehaviour
 
         calculatedStats[StatToAffect.MinRewardsMultiplierCircle] = new BigDouble(2);
         calculatedStats[StatToAffect.MaxRewardsMultiplierCircle] = new BigDouble(8);
+
+        calculatedStats[StatToAffect.EnchenteurMultiplier] = new BigDouble(0);
 
         // (Pour toute nouvelle stat, tu ajoutes sa valeur de base ici)
     }

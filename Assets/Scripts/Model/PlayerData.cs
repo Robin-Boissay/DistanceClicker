@@ -72,7 +72,6 @@ public class PlayerData
     /// </summary>
     public bool SpendCurrency(BigDouble amount)
     {
-        Debug.Log($"Tentative de dépense de {amount}. Monnaie actuelle : {monnaiePrincipale}");
         if (monnaiePrincipale >= amount)
         {
             monnaiePrincipale -= amount;
@@ -99,6 +98,22 @@ public class PlayerData
     }
 
     /// <summary>
+    /// Dépense de l'exp 
+    /// </summary>
+    public bool SpendExperience(BigDouble amount)
+    {
+        if (expJoueur >= amount)
+        {
+            expJoueur -= amount;
+            NotifyChange(); // On prévient l'UI de la monnaie !
+            return true;
+        }
+        return false;
+    }
+
+
+
+    /// <summary>
     /// Convertit cet objet PlayerData en un Dictionnaire
     /// que Cloud Firestore peut comprendre.
     /// </summary>
@@ -114,6 +129,12 @@ public class PlayerData
             { "exponent", monnaiePrincipale.GetExponent() }
         };
 
+        Dictionary<string, object> experienceData = new Dictionary<string, object>
+        {
+            { "mantissa", expJoueur.GetMantissa() },
+            { "exponent", expJoueur.GetExponent() }
+        };
+
         // 2. Gérer les métadonnées
         Dictionary<string, object> metadata = new Dictionary<string, object>
         {
@@ -126,6 +147,7 @@ public class PlayerData
         Dictionary<string, object> data = new Dictionary<string, object>
         {
             { "monnaiePrincipale", monnaieData },
+            { "expJoueur", experienceData },
             { "metadata", metadata },
             { "username", username },
             // C'est là que c'est magique :
@@ -156,6 +178,19 @@ public class PlayerData
                 long exponent = Convert.ToInt64(monnaieMap["exponent"]);
                 
                 this.monnaiePrincipale = new BigDouble(mantissa, (int)exponent);
+            }
+        }
+
+        // 1. Parse l'expérience
+        if (data.TryGetValue("expJoueur", out object experienceObj))
+        {
+            Dictionary<string, object> experienceMap = experienceObj as Dictionary<string, object>;
+            if (experienceMap != null && experienceMap.ContainsKey("mantissa") && experienceMap.ContainsKey("exponent"))
+            {
+                double mantissa = Convert.ToDouble(experienceMap["mantissa"]);
+                long exponent = Convert.ToInt64(experienceMap["exponent"]);
+
+                this.expJoueur = new BigDouble(mantissa, (int)exponent);
             }
         }
 

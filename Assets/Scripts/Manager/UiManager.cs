@@ -25,6 +25,8 @@ public class UIManager : MonoBehaviour
     [Header("UI Monnaie & DPC")]
     public TextMeshProUGUI distanceMonnaieText; // Renommé pour plus de clarté
     public TextMeshProUGUI dpcText;
+    public TextMeshProUGUI dpsText;
+    public TextMeshProUGUI levelText;
 
     [Header("UI Cible Actuelle")]
     public TextMeshProUGUI targetNameText;
@@ -126,7 +128,9 @@ public class UIManager : MonoBehaviour
     public void UpdateGeneralUI()
     {
         distanceMonnaieText.text = "DistanceMonnaie: " + NumberFormatter.Format(StatsManager.Instance.currentPlayerData.monnaiePrincipale) + " $"; // Unité plus logique
-        dpcText.text = "DPC: " + NumberFormatter.Format(StatsManager.Instance.GetStat(StatToAffect.DPC));
+        dpcText.text = "DPC: " + NumberFormatter.Format(StatsManager.Instance.GetStat(StatToAffect.DPC) * (1 + StatsManager.Instance.GetStat(StatToAffect.EnchenteurMultiplier)/100));
+        dpsText.text = "DPS: " + NumberFormatter.Format(StatsManager.Instance.GetStat(StatToAffect.DPS) * (1 + StatsManager.Instance.GetStat(StatToAffect.EnchenteurMultiplier)/100));
+        levelText.text = "Niveau: " + ConvertExpToLevel.GetLevelFromExp(StatsManager.Instance.currentPlayerData.expJoueur);
     }
 
     public void ActualiseTargetInfos()

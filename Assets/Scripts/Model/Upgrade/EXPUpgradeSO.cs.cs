@@ -6,19 +6,17 @@ using System;
 /// Classe pour les améliorations qui augmentent le DPC (Damage Per Click).
 /// </summary>
 /// // Permet de créer l'asset dans Unity : clic droit -> Create -> Shop -> Upgrade Definition
-[CreateAssetMenu(fileName = "NewSpawnRateUpgrade", menuName = "Shop/Spawn Rate Upgrade Definition")]
-public class SpawnRateUpgradeSO : StatsUpgrade
+[CreateAssetMenu(fileName = "NewExpUpgrade", menuName = "Shop/EXP Upgrade Definition")] 
+public class EXPUpgradeSO : StatsUpgrade
 {
     public override void Purchase(PlayerData data)
     {
         int currentLevel = GetLevel();
 
-        if(data.SpendCurrency(GetCurrentCost()))
+        if(data.SpendExperience(GetCurrentCost()))
         {
             data.IncrementUpgradeLevel(this.upgradeID);
-            ClickCircleSpawner.Instance.ActualiseSpawnRate();
         }
-
     }
 
     public override BigDouble GetCurrentCost()
@@ -41,7 +39,7 @@ public class SpawnRateUpgradeSO : StatsUpgrade
     public override BigDouble CalculateTotalStatValue(int level)
     {
         int currentLevel = GetLevel();
-        return - (currentLevel * baseStatGain);
+        return currentLevel * baseStatGain;
     }
 
     public int GetLevel()
@@ -56,12 +54,11 @@ public class SpawnRateUpgradeSO : StatsUpgrade
         int currentLevel = GetLevel();
 
         PlayerData data = StatsManager.Instance.currentPlayerData;
-
-        if (levelMax == 0 && GetCurrentCost() <= data.monnaiePrincipale)
+        if (levelMax == 0 && GetCurrentCost() <= data.expJoueur)
         {
 
             return true;
         }
-        return GetCurrentCost() <= data.monnaiePrincipale  && currentLevel < levelMax;
+        return GetCurrentCost() <= data.expJoueur  && currentLevel < levelMax;
     }
 }

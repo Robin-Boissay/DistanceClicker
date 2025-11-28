@@ -49,6 +49,8 @@ public class ShopItemUI : MonoBehaviour
                 effectText.text = StatsManager.Instance.GetStat(StatToAffect.MinRewardsMultiplierCircle) + " -> " + (StatsManager.Instance.GetStat(StatToAffect.MinRewardsMultiplierCircle) + currentStatUpgrade.baseStatGain);
             else if(currentStatUpgrade.statToAffect == StatToAffect.SpawnRateCircle)
                 effectText.text = " SpawnRate -= " + currentStatUpgrade.baseStatGain.GetMantissa().ToString("F2") + "s";
+            else if(currentStatUpgrade.statToAffect == StatToAffect.EnchenteurMultiplier)
+                effectText.text = " Damage multiplier += " + currentStatUpgrade.baseStatGain.GetMantissa().ToString("F2") + "%";
             else{
                 effectText.text += NumberFormatter.Format(currentStatUpgrade.baseStatGain);
             }
@@ -83,24 +85,31 @@ public class ShopItemUI : MonoBehaviour
 
         if (currentUpgrade == null || playerData == null) return;
         
-        BigDouble cost = currentUpgrade.GetCurrentCost(playerData);
+        BigDouble cost = currentUpgrade.GetCurrentCost();
 
         // Remplir les infos dynamiques
         //descriptionText.text = currentUpgrade.infoAffichage; // (Tu peux aussi le changer)
         costText.text = $"{NumberFormatter.Format(cost)}$"; // Formatte le nombre
         levelText.text = $"Lvl. {playerData.GetUpgradeLevel(currentUpgrade.upgradeID).ToString()}";
         
+        // Gérer l'état du bouton
+        bool canAfford = playerData.monnaiePrincipale >= cost;
+        bool prerequisitesMet = currentUpgrade.IsRequirementsMet();
+
         if (currentUpgrade.uiInfo.gainText && currentUpgrade is StatsUpgrade currentStatUpgrade)
         {
             if(currentStatUpgrade.statToAffect == StatToAffect.MaxRewardsMultiplierCircle)
                 effectText.text = StatsManager.Instance.GetStat(StatToAffect.MaxRewardsMultiplierCircle) + " -> " + (StatsManager.Instance.GetStat(StatToAffect.MaxRewardsMultiplierCircle) + currentStatUpgrade.baseStatGain);
             else if(currentStatUpgrade.statToAffect == StatToAffect.MinRewardsMultiplierCircle)
                 effectText.text = StatsManager.Instance.GetStat(StatToAffect.MinRewardsMultiplierCircle) + " -> " + (StatsManager.Instance.GetStat(StatToAffect.MinRewardsMultiplierCircle) + currentStatUpgrade.baseStatGain);
+            else if(currentStatUpgrade.statToAffect == StatToAffect.EnchenteurMultiplier){
+                costText.text = $"{ConvertExpToLevel.GetLevelFromExp(cost).ToString()}Level"; // Formatte le nombre
+                canAfford = playerData.expJoueur >= cost;
+            }
         }
+
         
-        // Gérer l'état du bouton
-        bool canAfford = playerData.monnaiePrincipale >= cost;
-        bool prerequisitesMet = currentUpgrade.IsRequirementsMet();
+        
 
         purchaseButton.interactable = canAfford && prerequisitesMet;
 
