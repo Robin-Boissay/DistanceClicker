@@ -137,16 +137,20 @@ public class StatsManager : MonoBehaviour
                     StatToAffect stat = statUpgrade.statToAffect;
 
                     calculatedStats[stat] += contribution;
-
                 }
             }
         }
+
         // 7. Gérer les "caps" (ex: SpawnRate ne peut pas être < 0.5s)
         if (calculatedStats[StatToAffect.SpawnRateCircle] < 0.2)
         {
             calculatedStats[StatToAffect.SpawnRateCircle] = new BigDouble(0.2);
         }
 
+        if(IdleManager.Instance != null)
+        {
+            IdleManager.Instance.ActualiseDPS();
+        }
         // 8. Notifier l'UI
         OnStatsUpdated?.Invoke();
     }

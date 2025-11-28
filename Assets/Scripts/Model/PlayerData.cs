@@ -8,10 +8,10 @@ using Firebase.Firestore;
 public class PlayerData
 {
     private int identifiantJoueur;
-    private string username;
+    public string username;
 
     public BigDouble monnaiePrincipale;
-
+    public BigDouble expJoueur;
     private Dictionary<string, int> upgradeLevels;
     
     // L'événement qui préviendra le StatsManager
@@ -21,6 +21,7 @@ public class PlayerData
     public PlayerData(bool needCreateUsername = true)
     {
         monnaiePrincipale = new BigDouble(0);
+        expJoueur = new BigDouble(0);
         identifiantJoueur = 0;
         if (needCreateUsername)
         {
@@ -90,6 +91,11 @@ public class PlayerData
     {
         monnaiePrincipale += amount;
         NotifyChange();
+    }
+
+    public void AddExperience(BigDouble amount)
+    {
+        expJoueur += amount;
     }
 
     /// <summary>
