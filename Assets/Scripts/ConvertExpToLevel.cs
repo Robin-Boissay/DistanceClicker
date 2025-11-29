@@ -40,6 +40,23 @@ public static class ConvertExpToLevel
     }
 
     /// <summary>
+    /// Calcule le pourcentage de progression vers le niveau suivant.
+    /// Renvoie un FLOAT entre 0 et 1 pour les barres de progression.
+    /// </summary>
+    public static float GetProgressToNextLevel(BigDouble exp)
+    {
+        int currentLevel = GetLevelFromExp(exp);
+        BigDouble expForCurrentLevel = GetExpForLevel(currentLevel);
+        BigDouble expForNextLevel = GetExpForLevel(currentLevel + 1);
+
+        // Calcul du pourcentage de progression
+        BigDouble progress = (exp - expForCurrentLevel) / (expForNextLevel - expForCurrentLevel);
+
+        // Conversion en float pour l'UI
+        return (float)progress.ToDouble();
+    }
+
+    /// <summary>
     /// (Bonus) Calcule l'XP requise pour atteindre un niveau précis.
     /// Utile pour afficher la barre de progression (ex: XP actuelle / XP Requise).
     /// </summary>

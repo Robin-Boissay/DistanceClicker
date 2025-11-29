@@ -55,6 +55,11 @@ public class ShopItemUI : MonoBehaviour
                 effectText.text += NumberFormatter.Format(currentStatUpgrade.baseStatGain);
             }
         }
+        if(currentUpgrade.uiInfo.iconImage != null){
+            iconImage.sprite = currentUpgrade.uiInfo.iconImage;    
+        }else{
+            iconImage.enabled = false;
+        }
 
         RefreshUI();
     }

@@ -37,6 +37,7 @@ public class UIManager : MonoBehaviour
     public GameObject btnNextTarget;
     public Image spriteObjetActuelle;
     public Slider progressBar;
+    public Slider expProgressBar;
 
     public void Initialize()
     {
@@ -135,7 +136,6 @@ public class UIManager : MonoBehaviour
 
     public void ActualiseTargetInfos()
     {
-        Debug.Log("Affichage Modifié");
         //Update la vie total et recompense d'une cible au cas ou c'est une amélioration mastery acheté.
         BigDouble distanceTotal = DistanceManager.instance.GetDistanceTotalCibleActuelle();
         string recompenseEnMonnaie = NumberFormatter.Format(DistanceManager.instance.GetRewardTotalCibleActuelle());
@@ -185,5 +185,10 @@ public class UIManager : MonoBehaviour
         BigDouble ratio = current / total;
 
         progressBar.value = (float)ratio.ToDouble();
+    }
+
+    public void UpdateExpLevel()
+    {
+        levelText.text = "Niveau: " + ConvertExpToLevel.GetLevelFromExp(StatsManager.Instance.currentPlayerData.expJoueur);
     }
 }

@@ -63,7 +63,7 @@ public class DistanceManager : MonoBehaviour
         // Pour l'instant, on commence simplement par la première cible.
         if (premiereCible != null)
         {
-            SetNewTarget(premiereCible);
+            SetupToMaxTargetAvaible();
         }
         else
         {
@@ -206,6 +206,18 @@ public class DistanceManager : MonoBehaviour
         {
             Debug.LogWarning("Impossible d'avancer : soit il n'y a pas de cible actuelle, soit c'est la dernière de la liste.");
         }
+    }
+
+    public void SetupToMaxTargetAvaible()
+    {
+        DistanceObjectSO target = premiereCible;
+
+        while (target.objetSuivant != null && target.objetSuivant.IsRequirementsMet())
+        {
+            target = target.objetSuivant;
+        }
+
+        SetNewTarget(target);
     }
 
     public void ClickAction()
