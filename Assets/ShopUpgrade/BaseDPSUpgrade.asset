@@ -21,7 +21,7 @@ MonoBehaviour:
     descriptionText: 
     effectText: + DPS
     gainText: 1
-    iconImage: {fileID: 0}
+    iconImage: {fileID: 21300000, guid: 434fb8ea1bc081e45a8f2240b12edfa5, type: 3}
   conditionUnlock:
     levelUnlock: 0
     upgradeDefinition: {fileID: 0}
