@@ -22,6 +22,12 @@ public class ClickCircle : MonoBehaviour
 
     [SerializeField] private Animator circleAnimator; // Référence à l'Animator des cercles
 
+    // Permet à l'agent de lire la valeur du rond sous forme de double
+    public double GetRecompenseDistanceAsDouble()
+    {
+        return recompenseDistance.ToDouble();
+    }
+
     void Awake()
     {
         // On récupère le composant Image qui gère la couleur du rond
@@ -96,11 +102,17 @@ public class ClickCircle : MonoBehaviour
 
             // 1. Donne la récompense
             StatsManager.Instance.currentPlayerData.AddExperience(recompenseDistance);
+            // 2. Dire au spawner que le rond n'est plus dispo
+            if (ClickCircleSpawner.Instance != null)
+            {
+                ClickCircleSpawner.Instance.bonusCircleActive = false;
+            }
 
+            // 3. Mise à jour de l'UI
             UIManager.instance.expProgressBar.value = ConvertExpToLevel.GetProgressToNextLevel(StatsManager.Instance.currentPlayerData.expJoueur);
-
             UIManager.instance.UpdateExpLevel();
 
+            // 4. Ajout au compteur de distance
             DistanceManager.instance.AddDistance(recompenseDistance);
         }
         // 3. Détruit l'objet
@@ -109,7 +121,38 @@ public class ClickCircle : MonoBehaviour
 
     public void AutoDestruction()
     {
+        // Si le joueur ne l'a pas cliqué à temps,
+        // on déclare aussi que le bonus n'est plus actif.
+        if (ClickCircleSpawner.Instance != null)
+        {
+            ClickCircleSpawner.Instance.bonusCircleActive = false;
+        }
+        
         // Détruit l'objet
         Destroy(gameObject);
     }
+
+    public void AgentClick()
+    {
+        // Donne la récompense
+        DistanceManager.instance.AddDistance(recompenseDistance);
+
+        // Notifie le spawner que le rond n'est plus actif
+        if (ClickCircleSpawner.Instance != null)
+        {
+            ClickCircleSpawner.Instance.bonusCircleActive = false;
+        }
+
+        // Détruit l'objet
+        var anim = GetComponent<Animator>();
+        if (anim != null)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 }
+

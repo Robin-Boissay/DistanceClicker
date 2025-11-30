@@ -1,0 +1,36 @@
+@startuml
+title DistanceClicker — ML-Agents Architecture (overview)
+
+skinparam monochrome true
+skinparam defaultFontName "Segoe UI"
+skinparam rectangle {
+  BackgroundColor #ffffff
+  BorderColor #cbd5e1
+  RoundCorner 8
+}
+
+actor "Developer / Unity Editor" as Dev
+queue "Unity Scene + Environment" as Scene
+rectangle "DistanceClickerAgent\n(CollectObservations, OnActionReceived, Rewards)" as Agent
+rectangle "Managers\nDistanceManager\nPlayerDataManager\nShopManager" as Managers
+rectangle "MLTrainingManager\n(parallel envs, timeScale)" as TrainerManager
+
+Dev -> Scene: Load scene / start
+Scene --> Agent
+Agent --> Managers
+Agent --> TrainerManager
+
+package "Python Trainer (External)" {
+  rectangle "mlagents-learn\n(Assets/ml-agents-config.yaml - PPO)" as PythonTrainer
+  rectangle "TensorBoard / Checkpoints" as TB
+}
+
+Agent --[#000080]-> PythonTrainer : gRPC communicator
+PythonTrainer --> TB : logs & saves checkpoints
+
+note bottom of TrainerManager
+  - Training: Unity runs env(s) and connects to mlagents-learn
+  - Inference: exported model used inside build (Barracuda)
+end note
+
+@enduml

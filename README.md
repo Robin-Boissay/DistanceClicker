@@ -1,17 +1,14 @@
 # DistanceClicker
-The futur best game of the year !
 
-Prérequis pour pouvoir lancer le projet une fois clone depuis la branch develop:
+The future best game of the year!
 
-L'application utilise une BD firebase et il faut donc importer les packages en questions.
-Au lancement du projet ça vous mettra une erreur et vous proposera d'entrer en safeMode, cliquer sur enter safe mode.
+Prérequis (pour lancer le projet depuis la branche `develop`):
 
-Ensuite télécharger le package firebase à l'url suivante -> https://firebase.google.com/download/unity?hl=fr
-Déziper le dossier. 
-Maintenant que vous avez unity ouvert avec votre projet en safe mode et le dossier unzip, aller dans le dossier, double cliquer sur firebaseAuth, cela vas importer la package dans unity puis faite de même avec firebaseFirestore.
+- Le projet utilise Firebase : importez les packages Unity fournis par Firebase.
+- Au premier lancement vous pourrez être invité à passer en "Safe Mode" — acceptez et importez les packages.
+- Téléchargez les packages Firebase Unity ici: https://firebase.google.com/download/unity?hl=fr
+- Dézippez l'archive et importez les packages nécessaires (par exemple `firebaseAuth` puis `firebaseFirestore`) en double-cliquant dessus dans l'éditeur Unity.
 
-Maintenant les erreurs devrait avoir disparu et le safe mode disparu de lui même.
+Si des erreurs persistent, ouvrez la scène d'exemple via l'explorateur d'Assets (Samplescene) dans l'inspecteur Unity.
 
-Ensuite si la bonne scene apparait à l'écran tout est bon sinon dans l'inspecteur unity aller dans vos assets, dans scene puis double cliquer sur samplescene.
-
-Normalement tout est bon maintenant !
+Bonne chance et amusez-vous bien !

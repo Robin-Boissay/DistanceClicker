@@ -9,6 +9,8 @@ public class ClickCircleSpawner : MonoBehaviour
     public GameObject clickCirclePrefab;
     public RectTransform zoneApparition; 
     public float tempsEntreApparitions;
+    public bool bonusCircleActive = false;
+    public float currentBonusValue = 0f; // estimation récompense du dernier rond apparu
 
     private Vector2 rondSize;
     private Coroutine spawnCoroutine; // Référence à notre coroutine en cours
@@ -17,12 +19,11 @@ public class ClickCircleSpawner : MonoBehaviour
     {
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
-        
+
         // J'ai déplacé ce Debug.Log ici, il était mal placé dans ton Update()
         Debug.Log("ClickCircleSpawner: Démarrage de l'initialisation...");
 
         tempsEntreApparitions = (float)StatsManager.Instance.GetStat(StatToAffect.SpawnRateCircle).ToDouble();
-        
         // Initialisation de la taille du rond
         if (clickCirclePrefab != null)
         {
@@ -86,6 +87,20 @@ public class ClickCircleSpawner : MonoBehaviour
 
         GameObject nouveauRond = Instantiate(clickCirclePrefab, zoneApparition);
         nouveauRond.GetComponent<RectTransform>().anchoredPosition = positionAleatoire;
+
+        // On note qu'un rond est actif
+        bonusCircleActive = true;
+
+        // On va lire la récompense du rond, pour l'envoyer à l'IA
+        ClickCircle cc = nouveauRond.GetComponent<ClickCircle>();
+        if (cc != null)
+        {
+            currentBonusValue = (float)cc.GetRecompenseDistanceAsDouble();
+        }
+        else
+        {
+            currentBonusValue = 0f;
+        }
     }
 
     /// <summary>
@@ -106,5 +121,26 @@ public class ClickCircleSpawner : MonoBehaviour
         // Relancer la coroutine avec le nouveau temps d'apparition
         // (cela fait apparaître un rond immédiatement, ce qui est un bon feedback)
         spawnCoroutine = StartCoroutine(SpawnLoopCoroutine());
+    }
+
+    public bool TryForceClickActiveCircle()
+    {
+        // On parcourt les ronds actuellement dans la zone d'apparition
+        foreach (Transform child in zoneApparition)
+        {
+            ClickCircle cc = child.GetComponent<ClickCircle>();
+            if (cc != null)
+            {
+                // Simule le clic du joueur
+                cc.AgentClick();
+
+                // Marque le bonus comme consommé
+                bonusCircleActive = false;
+                return true;
+            }
+        }
+
+        // Aucun rond actif trouvé
+        return false;
     }
 }

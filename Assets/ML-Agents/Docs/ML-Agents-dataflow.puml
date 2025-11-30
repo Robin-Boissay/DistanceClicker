@@ -1,0 +1,85 @@
+@startuml
+title DistanceClicker — ML-Agents Architecture (Détails Techniques)
+
+skinparam monochrome true
+skinparam defaultFontName "Segoe UI"
+skinparam noteFontSize 11
+skinparam rectangle {
+  BackgroundColor #ffffff
+  BorderColor #333333
+  RoundCorner 8
+}
+
+actor "Développeur / Unity Editor" as Dev
+queue "Unity Scene + Environment" as Scene
+
+rectangle "DistanceClickerAgent" as Agent
+note left of Agent
+  **Le "Client" (C#)**
+  Il collecte les données (money, distance...)
+  et exécute les ordres reçus.
+end note
+
+rectangle "Managers\n(Logique du Jeu)" as Managers
+
+rectangle "MLTrainingManager" as TrainerManager
+note bottom of TrainerManager
+  **Parallel Environments**
+  Technique pour accélérer l'entraînement :
+  On lance 10 ou 20 copies du jeu en même temps.
+  L'IA apprend 20x plus vite.
+end note
+
+package "Python Trainer (Cerveau Externe)" {
+  rectangle "mlagents-learn\n(PPO / SAC)" as PythonTrainer
+  note right of PythonTrainer
+    **Le "Professeur" (Python)**
+    C'est lui qui calcule comment modifier le cerveau.
+    
+    **PPO (Proximal Policy Optimization) :**
+    C'est l'algorithme mathématique utilisé ici.
+    Il est réputé pour être "stable" (il évite
+    que l'IA désapprenne tout brutalement).
+  end note
+
+  rectangle "TensorBoard / Checkpoints" as TB
+  note right of TB
+    **TensorBoard :**
+    Outil de visualisation (graphiques).
+    Permet de voir si la courbe de récompense monte.
+    
+    **Checkpoints :**
+    Sauvegardes régulières du cerveau (.onnx)
+    pendant l'entraînement.
+  end note
+}
+
+Dev -> Scene: Play
+Scene --> Agent
+Agent --> Managers
+Agent --> TrainerManager
+
+Agent <--> PythonTrainer : **gRPC Communicator**
+note on link
+  **gRPC (Google Remote Procedure Call)**
+  C'est le "tuyau" de communication haute performance.
+  
+  1. Unity envoie les **Observations** (Vector 27 floats).
+  2. Python traite et renvoie les **Actions** (Vector 3 ints).
+  
+  C'est un protocole réseau très rapide, 
+  bien plus efficace que du JSON ou HTTP classique.
+end note
+
+PythonTrainer --> TB : Logs & Saves
+
+note bottom of Agent
+  **Inference (Barracuda / Sentis)**
+  Une fois l'entraînement fini, on obtient un fichier **.onnx**.
+  
+  L'**Inférence**, c'est utiliser ce fichier DANS Unity
+  sans Python. Le moteur "Barracuda" (ou Sentis)
+  lit le fichier et prend les décisions en temps réel.
+end note
+
+@enduml

@@ -227,29 +227,97 @@ public class DistanceManager : MonoBehaviour
         AddDistance(distance);
         //clickWholeAreaAnimator.SetTrigger("clickWholeArea");
     }
-
+    
+    /// <summary>
+    /// Calcul des statistiques finales d'une cible en tenant compte des améliorations (ex: Mastery).
+    /// Retourne un tuple (finalDistance, finalReward).
+    /// </summary>
     public (BigDouble finalDistance, BigDouble finalReward) CalculateTargetStats(DistanceObjectSO target)
     {
-        var Data = StatsManager.Instance.currentPlayerData;
         if (target == null)
         {
             Debug.LogError("La cible fournie est nulle.");
-            return (0, 0);
+            return (new BigDouble(0), new BigDouble(0));
         }
 
         Dictionary<string, BaseGlobalUpgrade> ownedUpgrades = StatsManager.Instance.GetUpgradeMap();
 
-        if (ownedUpgrades.TryGetValue("Mastery_" + target.distanceObjectId, out BaseGlobalUpgrade upgradeSO))
+        if (ownedUpgrades != null && ownedUpgrades.TryGetValue("Mastery_" + target.distanceObjectId, out BaseGlobalUpgrade upgradeSO))
         {
-            Debug.Log($"Amélioration trouvée pour l'ID : {upgradeSO}");
             MasteryUpgrade masteryUpgrade = upgradeSO as MasteryUpgrade;
-            (BigDouble masteryBonus, BigDouble rewardBonus) = masteryUpgrade.GetTotalMasteryBonus();
-            return (masteryBonus, rewardBonus);
-        }else
-        {
-            Debug.LogError($"Aucune amélioration trouvée pour l'ID : {target.distanceObjectId}");
-
-            return (target.distanceTotale, target.recompenseEnMonnaie);
+            if (masteryUpgrade != null)
+            {
+                (BigDouble masteryBonus, BigDouble rewardBonus) = masteryUpgrade.GetTotalMasteryBonus();
+                return (masteryBonus, rewardBonus);
+            }
         }
+
+        // Par défaut, retourne les valeurs de base de la cible
+        return (target.distanceTotale, target.recompenseEnMonnaie);
+    }
+
+    /// <summary>
+    /// Réinitialise le DistanceManager à l'état initial (première cible).
+    /// Utilisé par le ML-Agent pour reset l'environnement.
+    /// </summary>
+    public void ResetToFirstTarget()
+    {
+        if (premiereCible != null)
+        {
+            SetNewTarget(premiereCible);
+        }
+        else
+        {
+            Debug.LogWarning("Impossible de réinitialiser : 'premiereCible' est null.");
+        }
+    }
+
+    public int GetCurrentTargetIndex()
+    {
+        // On parcourt les cibles depuis la première pour connaître l'index
+        int index = 0;
+        DistanceObjectSO current = premiereCible;
+        while (current != null)
+        {
+            if (current == cibleActuelle)
+            {
+                return index;
+            }
+            current = current.objetSuivant;
+            index++;
+        }
+        return index;
+    }
+
+    public int GetTotalTargetsCount()
+    {
+        int count = 0;
+        DistanceObjectSO current = premiereCible;
+        while (current != null)
+        {
+            count++;
+            current = current.objetSuivant;
+        }
+        return count;
+    }
+
+    public float GetProgressionNormalized()
+    {
+        if (cibleActuelle == null || cibleActuelle.distanceTotale <= 0) return 0f;
+
+        BigDouble ratioBD = distanceParcourueSurCibleActuelle / cibleActuelle.distanceTotale;
+        double ratio = ratioBD.ToDouble();   
+
+        return Mathf.Clamp01((float)ratio);
+    }
+
+    public float GetRewardNormalized()
+    {
+        if (cibleActuelle == null) return 0f;
+        // Normalisation sur 100000 en BigDouble, puis conversion
+        BigDouble denom = new BigDouble(100000);
+        double norm = (cibleActuelle.recompenseEnMonnaie / denom).ToDouble();  // ✅
+
+        return Mathf.Clamp01((float)norm);
     }
 }
