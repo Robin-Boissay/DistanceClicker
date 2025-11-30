@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 021427346a2b2224885e6e46c9b01312, type: 3}
   m_Name: BossFinal
   m_EditorClassIdentifier: Assembly-CSharp::DistanceObjectSO
-  distanceObjectId: boss
+  distanceObjectId: 3
   nomAffichage: 'Boss final: TrekMorvan'
   icone: {fileID: 21300000, guid: de87113bfbfe56f4eb298870217dcaec, type: 3}
   description: 

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 021427346a2b2224885e6e46c9b01312, type: 3}
   m_Name: FirstDistanceObject
   m_EditorClassIdentifier: Assembly-CSharp::DistanceObjectSO
-  distanceObjectId: atome
+  distanceObjectId: 1
   nomAffichage: Atome
   icone: {fileID: 21300000, guid: 5c2965c9dc4f66a47ad96522aa90f38e, type: 3}
   description: 

@@ -66,7 +66,7 @@ AnimatorState:
   m_Transitions:
   - {fileID: 3650663413951510776}
   m_StateMachineBehaviours:
-  - {fileID: 4269045316098338605}
+  - {fileID: 7785644029047377616}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -103,18 +103,6 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
---- !u!114 &4269045316098338605
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 409293b94c2e1fd449c9f8658af7c093, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DestroyCircleWhenClicked
 --- !u!1107 &5926016364520042186
 AnimatorStateMachine:
   serializedVersion: 6
@@ -129,7 +117,7 @@ AnimatorStateMachine:
     m_Position: {x: 250, y: 120, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 2390959932885454859}
-    m_Position: {x: 550, y: 120, z: 0}
+    m_Position: {x: 560, y: 120, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []

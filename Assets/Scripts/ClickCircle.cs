@@ -22,6 +22,12 @@ public class ClickCircle : MonoBehaviour
 
     [SerializeField] private Animator circleAnimator; // Référence à l'Animator des cercles
 
+    // Permet à l'agent de lire la valeur du rond sous forme de double
+    public double GetRecompenseDistanceAsDouble()
+    {
+        return recompenseDistance.ToDouble();
+    }
+
     void Awake()
     {
         // On récupère le composant Image qui gère la couleur du rond
@@ -32,16 +38,15 @@ public class ClickCircle : MonoBehaviour
     {
         gameManager = FindFirstObjectByType<GameManager>();
 
-        playerData = StatsManager.Instance.currentPlayerData;
+        playerData = PlayerDataManager.instance.Data;
 
-        minRecompense = new BigDouble(StatsManager.Instance.GetStat(StatToAffect.DPC) * StatsManager.Instance.GetStat(StatToAffect.MinRewardsMultiplierCircle)) * (1 + StatsManager.Instance.GetStat(StatToAffect.EnchenteurMultiplier)/100);
-        maxRecompense = new BigDouble(StatsManager.Instance.GetStat(StatToAffect.DPC) * StatsManager.Instance.GetStat(StatToAffect.MaxRewardsMultiplierCircle)) * (1 + StatsManager.Instance.GetStat(StatToAffect.EnchenteurMultiplier)/100);
+        minRecompense = new BigDouble(playerData.statsInfo["dpc_base"] * 2);
+        maxRecompense = new BigDouble(playerData.statsInfo["dpc_base"] * 8);
 
         // 1. Détermination de la valeur aléatoire de la récompense
-        float randomRatio = Random.Range(0f, 1f); // génère un float entre 0.00 et 1.00
-        randomRatio = Mathf.Round(randomRatio * 10f) / 10f; // arrondi à 2 décimales
-
-        recompenseDistance = new BigDouble(minRecompense + (maxRecompense - minRecompense) * randomRatio);
+        int randomRatio = Random.Range(2, 8);
+        recompenseDistance = new BigDouble(playerData.statsInfo["dpc_base"] * randomRatio);
+        
         // 2. Détermination du temps de disparition en fonction de la récompense
         // La fonction InverseLerp calcule où se situe recompenseDistance 
         // entre minRecompense et maxRecompense (résultat entre 0 et 1).
@@ -94,14 +99,18 @@ public class ClickCircle : MonoBehaviour
         {
             circleAnimator.SetTrigger("onClick");
 
+            minRecompense = playerData.statsInfo["dpc_base"] * 2;
+            maxRecompense = playerData.statsInfo["dpc_base"] * 8;
+
             // 1. Donne la récompense
-            StatsManager.Instance.currentPlayerData.AddExperience(recompenseDistance);
-
-            UIManager.instance.expProgressBar.value = ConvertExpToLevel.GetProgressToNextLevel(StatsManager.Instance.currentPlayerData.expJoueur);
-
-            UIManager.instance.UpdateExpLevel();
-
             DistanceManager.instance.AddDistance(recompenseDistance);
+
+            // 2. Dire au spawner que le rond n'est plus dispo
+            if (ClickCircleSpawner.instance != null)
+            {
+                ClickCircleSpawner.instance.bonusCircleActive = false;
+            }
+
         }
         // 3. Détruit l'objet
         // L'animation s'en occupe avec DestroyCircleWhenClicked.cs
@@ -109,7 +118,38 @@ public class ClickCircle : MonoBehaviour
 
     public void AutoDestruction()
     {
+        // Si le joueur ne l'a pas cliqué à temps,
+        // on déclare aussi que le bonus n'est plus actif.
+        if (ClickCircleSpawner.instance != null)
+        {
+            ClickCircleSpawner.instance.bonusCircleActive = false;
+        }
+        
         // Détruit l'objet
         Destroy(gameObject);
     }
+
+    public void AgentClick()
+    {
+        // Donne la récompense
+        DistanceManager.instance.AddDistance(recompenseDistance);
+
+        // Notifie le spawner que le rond n'est plus actif
+        if (ClickCircleSpawner.instance != null)
+        {
+            ClickCircleSpawner.instance.bonusCircleActive = false;
+        }
+
+        // Détruit l'objet
+        var anim = GetComponent<Animator>();
+        if (anim != null)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 }
+

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 021427346a2b2224885e6e46c9b01312, type: 3}
   m_Name: Object0_Proton
   m_EditorClassIdentifier: Assembly-CSharp::DistanceObjectSO
-  distanceObjectId: proton
+  distanceObjectId: 0
   nomAffichage: Proton
   icone: {fileID: 21300000, guid: 60bacae7da5d67b44b8c78d5245f752c, type: 3}
   description: 
