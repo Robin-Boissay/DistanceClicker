@@ -13,6 +13,8 @@ public class PlayerData
     public BigDouble monnaiePrincipale;
     public BigDouble expJoueur;
     private Dictionary<string, int> upgradeLevels;
+    // Public stats dictionary used by legacy systems and ML-Agent observations
+    public Dictionary<string, BigDouble> statsInfo;
     
     // L'événement qui préviendra le StatsManager
     public static event Action OnDataChanged;
@@ -28,6 +30,11 @@ public class PlayerData
             username = NameGenerator.GenerateRandomName();
         }
         upgradeLevels = new Dictionary<string, int>();
+        statsInfo = new Dictionary<string, BigDouble>();
+        // Initialize some default stats so callers can rely on these keys
+        statsInfo["dps_base"] = new BigDouble(0);
+        statsInfo["dpc_base"] = new BigDouble(1);
+        statsInfo["spawn_rate_circle"] = new BigDouble(1);
     }
 
 

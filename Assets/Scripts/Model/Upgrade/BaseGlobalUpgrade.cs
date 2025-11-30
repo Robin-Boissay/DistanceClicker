@@ -40,7 +40,7 @@ public abstract class BaseGlobalUpgrade : ScriptableObject
 
     public bool GetIsShown()
     {
-        if (conditionUnlock == null || conditionUnlock.upgradeDefinition == null || conditionUnlock.levelUnlock == null)
+        if (conditionUnlock == null || conditionUnlock.upgradeDefinition == null)
         {
             return true;
         }

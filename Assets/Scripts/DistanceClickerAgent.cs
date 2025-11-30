@@ -152,12 +152,13 @@ public class DistanceClickerAgent : Agent
             lastMoneyAmount = new BigDouble(0);
             
             // Réinitialiser tous les niveaux d'upgrades
-            if (playerDataManager.Data.upgradeLevels != null)
+            var owned = playerDataManager.Data.GetOwnedUpgrades();
+            if (owned != null)
             {
-                var keys = new List<int>(playerDataManager.Data.upgradeLevels.Keys);
+                var keys = new List<string>(owned.Keys);
                 foreach (var key in keys)
                 {
-                    playerDataManager.Data.upgradeLevels[key] = 0;
+                    owned[key] = 0;
                 }
             }
             
@@ -268,16 +269,11 @@ public class DistanceClickerAgent : Agent
                 }
                 
                 // Niveau actuel de l'amélioration (normalisé)
-                int currentLevel = 0;
-                if (playerDataManager.Data.upgradeLevels != null && 
-                    !playerDataManager.Data.upgradeLevels.TryGetValue(upgrade.upgradeIDShop, out currentLevel))
-                {
-                    currentLevel = 0;
-                }
+                int currentLevel = playerDataManager.Data.GetUpgradeLevel(upgrade.upgradeID);
                 sensor.AddObservation(currentLevel / 20f); // Normaliser sur 20 niveaux max
-                
+
                 // Coût de l'amélioration (peut-on se la payer ?)
-                BigDouble cost = upgrade.CalculerCoutNiveau(currentLevel);
+                BigDouble cost = upgrade.GetCurrentCost();
                 bool canAfford = playerDataManager.Data.monnaiePrincipale >= cost;
                 sensor.AddObservation(canAfford ? 1f : 0f);
                 
@@ -635,20 +631,15 @@ public class DistanceClickerAgent : Agent
             return false;
         
         // Obtenir le niveau actuel de l'amélioration
-        int currentLevel = 0;
-        if (playerDataManager.Data.upgradeLevels != null && 
-            !playerDataManager.Data.upgradeLevels.TryGetValue(upgrade.upgradeIDShop, out currentLevel))
-        {
-            currentLevel = 0;
-        }
-        
-        BigDouble cost = upgrade.CalculerCoutNiveau(currentLevel);
-        
+        int currentLevel = playerDataManager.Data.GetUpgradeLevel(upgrade.upgradeID);
+
+        BigDouble cost = upgrade.GetCurrentCost();
+
         if (playerDataManager.Data.monnaiePrincipale >= cost)
         {
             // Simuler l'achat
             playerDataManager.RemoveCurrency(cost);
-            playerDataManager.Data.upgradeLevels[upgrade.upgradeIDShop] = currentLevel + 1;
+            playerDataManager.Data.IncrementUpgradeLevel(upgrade.upgradeID);
             playerDataManager.RecalculateAllStats();
             return true;
         }

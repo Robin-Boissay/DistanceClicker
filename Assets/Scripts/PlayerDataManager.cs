@@ -43,13 +43,13 @@ public class PlayerDataManager : MonoBehaviour
 
     void OnEnable()
     {
-        ShopManager.OnUpgradeBuyed += RecalculateAllStats;
+        PlayerData.OnDataChanged += RecalculateAllStats;
     }
 
     // Se désabonne proprement
     void OnDisable()
     {
-        ShopManager.OnUpgradeBuyed -= RecalculateAllStats;
+        PlayerData.OnDataChanged -= RecalculateAllStats;
     }
     
     private void ValidateAndInitializePlayerData(PlayerData data)
@@ -77,18 +77,19 @@ public class PlayerDataManager : MonoBehaviour
         }
 
         // 1. Valider les niveaux d'améliorations
-        foreach (UpgradeDefinitionSO definition in shopManager.allUpgrades)
+        foreach (BaseGlobalUpgrade definition in shopManager.allUpgrades)
         {
             if (definition == null) continue;
-            
-            Debug.Log(JsonUtility.ToJson(definition, true));   
+
+            Debug.Log($"Upgrade definition: {definition.upgradeID}");
+            var owned = data.GetOwnedUpgrades();
             // On vérifie si la clé (l'ID de l'upgrade) existe dans le dictionnaire du joueur.
-            if (!data.upgradeLevels.ContainsKey(definition.upgradeIDShop))
+            if (!owned.ContainsKey(definition.upgradeID))
             {
                 // Si elle n'existe pas, c'est une nouvelle amélioration ou une nouvelle partie.
                 // On l'ajoute avec le niveau de base 0.
-                data.upgradeLevels.Add(definition.upgradeIDShop, 0);
-                Debug.Log($"Amélioration manquante initialisée : {definition.upgradeIDShop} au niveau 0.");
+                owned.Add(definition.upgradeID, 0);
+                Debug.Log($"Amélioration manquante initialisée : {definition.upgradeID} au niveau 0.");
             }
         }
     }
@@ -225,16 +226,18 @@ public class PlayerDataManager : MonoBehaviour
         foreach (var definition in shopManager.allUpgrades)
         {
             // 4. Obtenir le niveau sauvegardé pour cette upgrade
-            int currentLevel = 0;
-            // TryGetValue est plus sûr : il ne crée pas d'erreur si la clé n'existe pas
-            Data.upgradeLevels.TryGetValue(definition.upgradeIDShop, out currentLevel);
+            int currentLevel = Data.GetUpgradeLevel(definition.upgradeID);
 
             // 5. Si le joueur possède cette upgrade (niveau > 0)
             if (currentLevel > 0)
             {
                 // 6. Calculer la contribution totale de cette upgrade
                 // (Ex: 5 niveaux * +10 DPS/niveau = +50 DPS)
-                BigDouble contribution = definition.valeurAjouteeParNiveau * currentLevel;
+                BigDouble contribution = new BigDouble(0);
+                if (definition is StatsUpgrade statsDef)
+                {
+                    contribution = statsDef.baseStatGain * currentLevel;
+                }
 
                 // 7. Ajouter cette contribution à la bonne stat
                 // Note : On utilise l'ID en string (ex: "dps_...") pour savoir quelle stat modifier
