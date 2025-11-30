@@ -74,6 +74,7 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
+<<<<<<< HEAD
 
 Assets/Firebase/
 Assets/Plugins/
@@ -85,3 +86,24 @@ Assets/GeneratedLocalRepo/
 DistanceClicker_BackUpThisFolder_ButDontShipItWithYourGame/
 DistanceClicker_BurstDebugInformation_DoNotShip/
 Assets/_Recovery/
+=======
+# ML-Agents
+mlagents-env/
+results/
+*.onnx.meta
+summaries/
+models/
+
+# Ignorer l'environnement virtuel
+venv310/
+
+# Dossiers et fichiers inutiles
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env/
+.DS_Store
+.idea/
+.vscode/
+>>>>>>> ml-agent-dev

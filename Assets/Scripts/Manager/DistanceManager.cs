@@ -227,6 +227,7 @@ public class DistanceManager : MonoBehaviour
         AddDistance(distance);
         //clickWholeAreaAnimator.SetTrigger("clickWholeArea");
     }
+<<<<<<< HEAD:Assets/Scripts/Manager/DistanceManager.cs
 
     public (BigDouble finalDistance, BigDouble finalReward) CalculateTargetStats(DistanceObjectSO target)
     {
@@ -252,4 +253,70 @@ public class DistanceManager : MonoBehaviour
             return (target.distanceTotale, target.recompenseEnMonnaie);
         }
     }
+=======
+    
+    /// <summary>
+    /// Réinitialise le DistanceManager à l'état initial (première cible).
+    /// Utilisé par le ML-Agent pour reset l'environnement.
+    /// </summary>
+    public void ResetToFirstTarget()
+    {
+        if (premiereCible != null)
+        {
+            SetNewTarget(premiereCible);
+        }
+        else
+        {
+            Debug.LogWarning("Impossible de réinitialiser : 'premiereCible' est null.");
+        }
+    }
+
+    public int GetCurrentTargetIndex()
+    {
+        // On parcourt les cibles depuis la première pour connaître l'index
+        int index = 0;
+        DistanceObjectSO current = premiereCible;
+        while (current != null)
+        {
+            if (current == cibleActuelle){
+                return index;
+            }
+            current = current.objetSuivant;
+            index++;
+        }
+        return index;
+    }
+
+    public int GetTotalTargetsCount()
+    {
+        int count = 0;
+        DistanceObjectSO current = premiereCible;
+        while (current != null)
+        {
+            count++;
+            current = current.objetSuivant;
+        }
+        return count;
+    }
+
+    public float GetProgressionNormalized()
+    {
+        if (cibleActuelle == null || cibleActuelle.distanceTotale <= 0) return 0f;
+
+        BigDouble ratioBD = distanceParcourueSurCibleActuelle / cibleActuelle.distanceTotale;
+        double ratio = ratioBD.ToDouble();   
+
+        return Mathf.Clamp01((float)ratio);
+    }
+
+    public float GetRewardNormalized()
+    {
+        if (cibleActuelle == null) return 0f;
+        // Normalisation sur 100000 en BigDouble, puis conversion
+        BigDouble denom = new BigDouble(100000);
+        double norm = (cibleActuelle.recompenseEnMonnaie / denom).ToDouble();  // ✅
+
+        return Mathf.Clamp01((float)norm);
+    }
+>>>>>>> ml-agent-dev:Assets/Scripts/DistanceManager.cs
 }

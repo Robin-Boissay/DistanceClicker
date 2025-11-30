@@ -1,4 +1,5 @@
 # DistanceClicker
+<<<<<<< HEAD
 The futur best game of the year !
 
 Prérequis pour pouvoir lancer le projet une fois clone depuis la branch develop:
@@ -15,3 +16,6 @@ Maintenant les erreurs devrait avoir disparu et le safe mode disparu de lui mêm
 Ensuite si la bonne scene apparait à l'écran tout est bon sinon dans l'inspecteur unity aller dans vos assets, dans scene puis double cliquer sur samplescene.
 
 Normalement tout est bon maintenant !
+=======
+The future best game of the year!
+>>>>>>> ml-agent-dev
