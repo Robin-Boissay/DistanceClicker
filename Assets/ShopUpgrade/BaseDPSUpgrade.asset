@@ -33,4 +33,7 @@ MonoBehaviour:
     mantissa: 1
     exponent: 0
   statToAffect: 1
-  milestones: []
+  milestones:
+  - milestoneLevel: 50
+    baseCostMultiplier: 1
+    statBonusMultiplier: 2

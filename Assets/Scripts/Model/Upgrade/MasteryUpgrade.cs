@@ -31,7 +31,7 @@ public class MasteryUpgrade : BaseMasteryUpgrade
         return BaseCost * BigDouble.Pow(GrowthCostFactor, GetLevel());
     }
 
-    public int GetLevel()
+    public override int GetLevel()
     {
         PlayerData data = StatsManager.Instance.currentPlayerData;
         int currentLevel = data.GetUpgradeLevel(this.upgradeID);

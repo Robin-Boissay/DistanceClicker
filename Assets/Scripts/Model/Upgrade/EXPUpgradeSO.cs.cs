@@ -19,30 +19,13 @@ public class EXPUpgradeSO : StatsUpgrade
         }
     }
 
-    public override BigDouble GetCurrentCost()
-    {
-        int currentLevel = GetLevel();
-        if (currentLevel >= 0)
-        {
-            // Coût = baseCost * (growthCostFactor ^ currentLevel)
-            BigDouble cost = baseCost * BigDouble.Pow(growthCostFactor, currentLevel);
-            return cost;
-        }
-        else
-        {
-            return baseCost;
-        }
-
-            
-    }
-
-    public override BigDouble CalculateTotalStatValue(int level)
+    public override BigDouble CalculateTotalStatValue()
     {
         int currentLevel = GetLevel();
         return currentLevel * baseStatGain;
     }
 
-    public int GetLevel()
+    public override int GetLevel()
     {
         PlayerData data = StatsManager.Instance.currentPlayerData;
         int currentLevel = data.GetUpgradeLevel(this.upgradeID);

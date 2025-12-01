@@ -13,6 +13,7 @@ public class ShopItemUI : MonoBehaviour
     public TextMeshProUGUI effectText;
     public Image iconImage;
     public Button purchaseButton;
+    public Slider progressMilestoneSlider;
 
     private BaseGlobalUpgrade currentUpgrade;
     private PlayerData playerData;
@@ -61,6 +62,18 @@ public class ShopItemUI : MonoBehaviour
             iconImage.enabled = false;
         }
 
+
+        //Gère le slider de progres du palier actuel
+        if(currentUpgrade is StatsUpgrade statsUpgrade && statsUpgrade.HasMilestones())
+        {
+            progressMilestoneSlider.gameObject.SetActive(true);
+            progressMilestoneSlider.value = statsUpgrade.GetProgressToNextMilestone();
+        }
+        else
+        {
+            progressMilestoneSlider.gameObject.SetActive(false);
+        }
+
         RefreshUI();
     }
     
@@ -95,7 +108,22 @@ public class ShopItemUI : MonoBehaviour
         // Remplir les infos dynamiques
         //descriptionText.text = currentUpgrade.infoAffichage; // (Tu peux aussi le changer)
         costText.text = $"{NumberFormatter.Format(cost)}$"; // Formatte le nombre
-        levelText.text = $"Lvl. {playerData.GetUpgradeLevel(currentUpgrade.upgradeID).ToString()}";
+        if(currentUpgrade.levelMax == 0)
+        {
+            levelText.text = $"Lvl. {playerData.GetUpgradeLevel(currentUpgrade.upgradeID).ToString()}";
+        }
+        else
+        {
+            if(currentUpgrade.GetLevel() >= currentUpgrade.levelMax)
+            {
+                levelText.text = $"Lvl. MAX";
+            }
+            else
+            {
+                levelText.text = $"Lvl. {playerData.GetUpgradeLevel(currentUpgrade.upgradeID).ToString()} / {currentUpgrade.levelMax.ToString()}";
+                
+            }
+        }
         
         // Gérer l'état du bouton
         bool canAfford = playerData.monnaiePrincipale >= cost;
@@ -111,6 +139,28 @@ public class ShopItemUI : MonoBehaviour
                 costText.text = $"{ConvertExpToLevel.GetLevelFromExp(cost).ToString()}Level"; // Formatte le nombre
                 canAfford = playerData.expJoueur >= cost;
             }
+            else if(currentStatUpgrade.statToAffect == StatToAffect.DPC){
+                effectText.text = " DPC + " + NumberFormatter.Format(currentStatUpgrade.GetStatBonusForLevel(currentStatUpgrade.GetLevel()));
+            }
+            else if(currentStatUpgrade.statToAffect == StatToAffect.DPS){
+                effectText.text = " DPS + " + NumberFormatter.Format(currentStatUpgrade.GetStatBonusForLevel(currentStatUpgrade.GetLevel()));
+            }
+        }
+
+        //Gère le slider de progres du palier actuel
+        if(currentUpgrade is StatsUpgrade statsUpgrade && statsUpgrade.HasMilestones())
+        {
+            float progress = statsUpgrade.GetProgressToNextMilestone();
+            if(progress != 0){
+                progressMilestoneSlider.value = progress;
+            }
+            else{
+                progressMilestoneSlider.gameObject.SetActive(false);
+            }
+        }
+        else
+        {
+            progressMilestoneSlider.gameObject.SetActive(false);
         }
 
         

@@ -134,7 +134,7 @@ public class StatsManager : MonoBehaviour
                 if (upgradeSO is StatsUpgrade statUpgrade)
                 {
                     // 5. Calculer sa contribution
-                    BigDouble contribution = statUpgrade.CalculateTotalStatValue(currentLevel);
+                    BigDouble contribution = statUpgrade.CalculateTotalStatValue();
 
                     // 6. Ajouter la contribution à la bonne stat
                     StatToAffect stat = statUpgrade.statToAffect;
