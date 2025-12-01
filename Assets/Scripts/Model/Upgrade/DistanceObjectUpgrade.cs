@@ -33,7 +33,7 @@ public class DistanceObjectUpgrade : BaseMasteryUpgrade
         return Cost;
     }
 
-    public int GetLevel()
+    public override int GetLevel()
     {
         PlayerData data = StatsManager.Instance.currentPlayerData;
         int currentLevel = data.GetUpgradeLevel("unlock_object_" + targetDistanceObjectToUnlock.distanceObjectId);

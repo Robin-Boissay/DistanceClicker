@@ -3988,8 +3988,8 @@ MonoBehaviour:
       exponent: 0
   allUpgradesDatabase:
   - {fileID: 11400000, guid: 36de4dccd681d8540a6610d3d04c6f86, type: 2}
-  - {fileID: 11400000, guid: f97abc95900387848a407eb59ae324a8, type: 2}
   - {fileID: 11400000, guid: 7d2d446bc66deff4dbe110cdfc2302db, type: 2}
+  - {fileID: 11400000, guid: 34cd04f992f928b49bbba38ae8c4812f, type: 2}
   - {fileID: 11400000, guid: 9064e059d81c1f549a6ce30bcd55bb47, type: 2}
   - {fileID: 11400000, guid: 5e4416358979e834a860afd6b450969d, type: 2}
   - {fileID: 11400000, guid: 9957942ce5a9b0c4fb77862eee0299b5, type: 2}
@@ -4001,7 +4001,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: fecc0cee51674874ca756013ac27556e, type: 2}
   - {fileID: 11400000, guid: cdfe6e46ee9548f4e8dfbce51df29d42, type: 2}
   - {fileID: 11400000, guid: a324fd1c00e35114f938033da9d0ae83, type: 2}
-  - {fileID: 11400000, guid: 34cd04f992f928b49bbba38ae8c4812f, type: 2}
 --- !u!1 &1132520374
 GameObject:
   m_ObjectHideFlags: 0
