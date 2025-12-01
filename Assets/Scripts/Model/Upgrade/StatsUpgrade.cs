@@ -28,7 +28,7 @@ public abstract class StatsUpgrade : BaseGlobalUpgrade
     //private MileStone[] milestones;
     public BigDouble GetStatBonusForLevel(int level)
     {
-        int totalStatsGainMultiplier = 1;
+        float totalStatsGainMultiplier = 1f;
         foreach (BaseMilestone milestone in milestones)
         {
             if (GetLevel() >= milestone.milestoneLevel)
@@ -50,7 +50,7 @@ public abstract class StatsUpgrade : BaseGlobalUpgrade
         int currentLevel = GetLevel();
         if (currentLevel >= 0)
         {
-            int totalBaseCostMultiplier = 1;
+            float totalBaseCostMultiplier = 1f;
             foreach (BaseMilestone milestone in milestones)
             {
                 if (currentLevel >= milestone.milestoneLevel)
@@ -83,12 +83,24 @@ public abstract class StatsUpgrade : BaseGlobalUpgrade
         {
             if (currentLevel < milestone.milestoneLevel)
             {
-                Debug.Log("Next milestone at level: " + milestone.milestoneLevel);
-                Debug.Log("Current level: " + currentLevel);
                 // Ajoute (float) devant le dénominateur ou le numérateur
                 return 1f - ((float)(milestone.milestoneLevel - currentLevel) / milestone.milestoneLevel);
             }
         }
         return 0; // Aucun palier suivant
+    }
+
+    public float GetCurrentMilestoneMultiplier()
+    {
+        int currentLevel = GetLevel();
+        foreach (BaseMilestone milestone in milestones)
+        {
+            if (currentLevel < milestone.milestoneLevel)
+            {
+                //Return float with 1 digit after comma
+                return milestone.statBonusMultiplier;
+            }
+        }
+        return 1; // Aucun palier suivant
     }
 }

@@ -9,7 +9,7 @@ public class BaseMilestone
 {
     public int milestoneLevel;
 
-    public int baseCostMultiplier;
+    public float baseCostMultiplier;
 
-    public int statBonusMultiplier;
+    public float statBonusMultiplier;
 }

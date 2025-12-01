@@ -14,6 +14,7 @@ public class ShopItemUI : MonoBehaviour
     public Image iconImage;
     public Button purchaseButton;
     public Slider progressMilestoneSlider;
+    public TextMeshProUGUI milestoneMultiplierText;
 
     private BaseGlobalUpgrade currentUpgrade;
     private PlayerData playerData;
@@ -150,6 +151,8 @@ public class ShopItemUI : MonoBehaviour
         //Gère le slider de progres du palier actuel
         if(currentUpgrade is StatsUpgrade statsUpgrade && statsUpgrade.HasMilestones())
         {
+            milestoneMultiplierText.text = "X" + statsUpgrade.GetCurrentMilestoneMultiplier().ToString("F1");
+            progressMilestoneSlider.gameObject.SetActive(true);
             float progress = statsUpgrade.GetProgressToNextMilestone();
             if(progress != 0){
                 progressMilestoneSlider.value = progress;
