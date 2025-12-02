@@ -118,7 +118,7 @@ public class ShopItemUI : MonoBehaviour
 
         purchaseButton.interactable = canAfford && prerequisitesMet;
 
-        Debug.Log($"Mise à jour de l'UI pour l'upgrade {currentUpgrade.GetIsShown()}}}");
+        // Debug.Log($"Mise à jour de l'UI pour l'upgrade {currentUpgrade.GetIsShown()}}}");
 
          if (this.GetCurrentUpgrade() is BaseMasteryUpgrade distanceUpgrade)
         {
