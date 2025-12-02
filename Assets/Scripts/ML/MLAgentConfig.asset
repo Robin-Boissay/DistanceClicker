@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41a09239795813249851ab65ea6418a9, type: 3}
+  m_Name: MLAgentConfig
+  m_EditorClassIdentifier: Assembly-CSharp::MLAgentConfiguration
+  maxEpisodeDuration: 120
+  targetCompletionReward: 1
+  upgradePurchaseReward: 0.2
+  clickReward: 0.01
+  moneyGainRewardMultiplier: 0.05
+  invalidActionPenalty: -0.1
+  stepPenalty: -0.001
+  maxMoneyForNormalization: 1000000
+  maxDPSForNormalization: 10000
+  maxDPCForNormalization: 1000
+  maxTargetRewardForNormalization: 100000
+  maxUpgradeCostForNormalization: 100000
+  maxUpgradeLevelForNormalization: 20
+  numberOfUpgradesToObserve: 5
+  verboseLogging: 0
+  logObservations: 0
+  logActions: 0
+  logRewards: 0
