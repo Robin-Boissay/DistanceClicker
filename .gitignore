@@ -74,22 +74,14 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
-# ML-Agents
-mlagents-env/
-results/
-*.onnx.meta
-summaries/
-models/
 
-# Ignorer l'environnement virtuel
-venv310/
+Assets/Firebase/
+Assets/Plugins/
+Assets/Editor Default Resources/
+Assets/ExternalDependencyManager/
+Assets/Plugins/Google.Play.Services/
+Assets/GeneratedLocalRepo/
 
-# Dossiers et fichiers inutiles
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.env/
-.DS_Store
-.idea/
-.vscode/
+DistanceClicker_BackUpThisFolder_ButDontShipItWithYourGame/
+DistanceClicker_BurstDebugInformation_DoNotShip/
+Assets/_Recovery/
