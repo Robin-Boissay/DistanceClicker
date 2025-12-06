@@ -9,26 +9,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ae015afb7117654588d41196e9face4, type: 3}
-  m_Name: MasteryBossUpgrade
-  m_EditorClassIdentifier: Assembly-CSharp::MasteryUpgrade
-  upgradeID: Mastery_boss
+  m_Script: {fileID: 11500000, guid: 4709cdd5f79332e4eb0842cd49b5033b, type: 3}
+  m_Name: UnlockUpgrade_BossV2
+  m_EditorClassIdentifier: Assembly-CSharp::DistanceObjectUpgrade
+  upgradeID: unlock_object_bossV2
   infoAffichage: Description de l'upgrade...
   shopCategory: 1
-  levelMax: 100
+  levelMax: 1
   uiInfo:
-    nameText: Mastery Boss
+    nameText: Unlock boss
     descriptionText: 
-    effectText: '* x% vie et gain'
+    effectText: 
     gainText: 0
     iconImage: {fileID: 0}
   conditionUnlock:
-    levelUnlock: 0
-    upgradeDefinition: {fileID: 0}
+    levelUnlock: 25
+    upgradeDefinition: {fileID: 11400000, guid: 8d73c0e41a59acb41bea80e4289da201, type: 2}
   targetWhereMasteryApplies: {fileID: 11400000, guid: f94f24a91b44961408e7464570a0722d, type: 2}
-  BaseCost:
-    mantissa: 1
-    exponent: 3
-  GrowthCostFactor: 1.12
-  MasteryDistanceMultiplier: 1.1
-  MasteryRewardMultiplier: 1.13
+  Cost:
+    mantissa: 5
+    exponent: 8
+  targetDistanceObjectToUnlock: {fileID: 11400000, guid: 0b34c5474a383ec4fb8bd9718b3c0eb8, type: 2}

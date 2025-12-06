@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 021427346a2b2224885e6e46c9b01312, type: 3}
-  m_Name: BossFinal
+  m_Name: BossFinalV2
   m_EditorClassIdentifier: Assembly-CSharp::DistanceObjectSO
-  distanceObjectId: boss
-  nomAffichage: 'Boss final: TrekMorvan'
-  icone: {fileID: 21300000, guid: de87113bfbfe56f4eb298870217dcaec, type: 3}
+  distanceObjectId: bossV2
+  nomAffichage: Killian
+  icone: {fileID: 21300000, guid: 318fda7817e13984998a647325cdb4ce, type: 3}
   description: 
   distanceTotale:
-    mantissa: 1
-    exponent: 4
+    mantissa: 6
+    exponent: 6
   recompenseEnMonnaie:
-    mantissa: 10
-    exponent: 3
-  objetSuivant: {fileID: 11400000, guid: 0b34c5474a383ec4fb8bd9718b3c0eb8, type: 2}
-  objetPrecedent: {fileID: 11400000, guid: e002fd91d6c71454a8641ad1eb27d818, type: 2}
+    mantissa: 5
+    exponent: 6
+  objetSuivant: {fileID: 0}
+  objetPrecedent: {fileID: 11400000, guid: f94f24a91b44961408e7464570a0722d, type: 2}
