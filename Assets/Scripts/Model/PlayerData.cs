@@ -12,7 +12,7 @@ public class PlayerData
 
     public BigDouble monnaiePrincipale;
     public BigDouble expJoueur;
-    private Dictionary<string, int> upgradeLevels;
+    private Dictionary<string, int> upgradeLevels = new Dictionary<string, int>();
     
     // L'événement qui préviendra le StatsManager
     public static event Action OnDataChanged;
@@ -41,6 +41,7 @@ public class PlayerData
     
     public Dictionary<string, int> GetOwnedUpgrades()
     {
+        EnsureUpgradeDict();
         return upgradeLevels;
     }
     
@@ -51,6 +52,7 @@ public class PlayerData
     {
         // 'TryGetValue' est plus performant que 'ContainsKey' + accès
         // Il retourne '0' si la clé n'existe pas, ce qui est parfait pour un niveau.
+        EnsureUpgradeDict();
         upgradeLevels.TryGetValue(upgradeID, out int level);
 
         return level;
@@ -62,6 +64,7 @@ public class PlayerData
     /// </summary>
     public void IncrementUpgradeLevel(string upgradeID)
     {
+        EnsureUpgradeDict();
         int currentLevel = GetUpgradeLevel(upgradeID);
         upgradeLevels[upgradeID] = currentLevel + 1;
         NotifyChange(); // On prévient le StatsManager !
@@ -204,6 +207,7 @@ public class PlayerData
             Dictionary<string, object> upgradesMap = upgradesObj as Dictionary<string, object>;
             if (upgradesMap != null)
             {
+                EnsureUpgradeDict();
                 this.upgradeLevels.Clear(); // Vider les valeurs par défaut
                 foreach (KeyValuePair<string, object> pair in upgradesMap)
                 {
@@ -253,5 +257,11 @@ public class PlayerData
 
         // 4. Notifie l'UI que les données sont prêtes !
         NotifyChange();
+    }
+
+    private void EnsureUpgradeDict()
+    {
+        if (upgradeLevels == null)
+            upgradeLevels = new Dictionary<string, int>();
     }
 }

@@ -39,8 +39,15 @@ public class StatsManager : MonoBehaviour
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
 
-        // 1. Initialiser le cache des stats
-        calculatedStats = new Dictionary<StatToAffect, BigDouble>();
+        if (calculatedStats == null)
+            calculatedStats = new Dictionary<StatToAffect, BigDouble>();
+
+        // éventuellement : mettre les stats à 0
+        foreach (StatToAffect s in System.Enum.GetValues(typeof(StatToAffect)))
+        {
+            if (!calculatedStats.ContainsKey(s))
+                calculatedStats[s] = new BigDouble(0);
+        }
 
         // 2. Construire la base de données d'accès rapide
         upgradeMap = new Dictionary<string, BaseGlobalUpgrade>();
@@ -118,7 +125,10 @@ public class StatsManager : MonoBehaviour
         ResetStatsCache();
 
         // 2. Parcourir TOUTES les upgrades que le joueur possède
-        foreach (KeyValuePair<string, int> ownedUpgrade in currentPlayerData.GetOwnedUpgrades())
+        var ownedUpgrades = currentPlayerData.GetOwnedUpgrades();
+        if (ownedUpgrades == null) return;
+
+        foreach (KeyValuePair<string, int> ownedUpgrade in ownedUpgrades)
         {
             string upgradeID = ownedUpgrade.Key;
             int currentLevel = ownedUpgrade.Value;
@@ -163,12 +173,18 @@ public class StatsManager : MonoBehaviour
     /// </summary>
     public BigDouble GetStat(StatToAffect stat)
     {
+        // Si le dictionnaire n'est pas encore initialisé, on renvoie 0
+        if (calculatedStats == null)
+        {
+            return new BigDouble(0);
+        }
+
         if (calculatedStats.TryGetValue(stat, out BigDouble value))
         {
             // La clé a été trouvée, on retourne la valeur
             return value;
         }
-        
+
         // La clé n'a PAS été trouvée, on retourne 0
         return new BigDouble(0);
     }

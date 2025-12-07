@@ -32,6 +32,9 @@ public class DistanceObjectSO : ScriptableObject
     /// </summary>
     public bool IsRequirementsMet()
     {
+        // Si les données ne sont pas prêtes, on considère que ce n'est pas débloqué
+        if (StatsManager.Instance == null || StatsManager.Instance.currentPlayerData == null)
+            return false;
         // si l'upgrade avec comme id la même que distanceObjectId est au moins au niveau 1 dans playerData alors on retourne true
         PlayerData data = StatsManager.Instance.currentPlayerData;
         int level = data.GetUpgradeLevel("unlock_object_" + distanceObjectId);

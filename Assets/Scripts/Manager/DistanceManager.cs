@@ -166,7 +166,14 @@ public class DistanceManager : MonoBehaviour
 
         OnNewTargetSet?.Invoke(cibleActuelle);
         OnDistanceChanged?.Invoke(distanceParcourueSurCibleActuelle, DistanceTotalCibleActuelle);
-        ShopManager.instance.UpdateMasteryTabForTarget(cibleActuelle); //affiche la bonne upgrade de maitrise du bon objets
+        if (ShopManager.instance != null)
+            {
+                ShopManager.instance.UpdateMasteryTabForTarget(cibleActuelle);
+            }
+            else
+            {
+                Debug.LogWarning("ShopManager.instance est null dans SetNewTarget, l'onglet de Mastery n'a pas été mis à jour.");
+            }    
     }
 
     public DistanceObjectSO GetCurrentTarget()
@@ -230,26 +237,51 @@ public class DistanceManager : MonoBehaviour
 
     public (BigDouble finalDistance, BigDouble finalReward) CalculateTargetStats(DistanceObjectSO target)
     {
-        var Data = StatsManager.Instance.currentPlayerData;
+        // 1. Cible invalide → on log et on renvoie 0
         if (target == null)
         {
             Debug.LogError("La cible fournie est nulle.");
             return (0, 0);
         }
 
-        Dictionary<string, BaseGlobalUpgrade> ownedUpgrades = StatsManager.Instance.GetUpgradeMap();
-
-        if (ownedUpgrades.TryGetValue("Mastery_" + target.distanceObjectId, out BaseGlobalUpgrade upgradeSO))
+        // 2. Si StatsManager n’est pas encore prêt → on renvoie les valeurs de base de l’objet
+        if (StatsManager.Instance == null || StatsManager.Instance.currentPlayerData == null)
         {
-            Debug.Log($"Amélioration trouvée pour l'ID : {upgradeSO}");
-            MasteryUpgrade masteryUpgrade = upgradeSO as MasteryUpgrade;
-            (BigDouble masteryBonus, BigDouble rewardBonus) = masteryUpgrade.GetTotalMasteryBonus();
-            return (masteryBonus, rewardBonus);
-        }else
-        {
-            Debug.LogError($"Aucune amélioration trouvée pour l'ID : {target.distanceObjectId}");
-
+            Debug.LogWarning("StatsManager ou currentPlayerData pas prêt, utilisation des valeurs de base de la cible.");
             return (target.distanceTotale, target.recompenseEnMonnaie);
         }
+
+        // 3. Récupération de la map des upgrades
+        Dictionary<string, BaseGlobalUpgrade> ownedUpgrades = StatsManager.Instance.GetUpgradeMap();
+        if (ownedUpgrades == null)
+        {
+            Debug.LogWarning("UpgradeMap est null, utilisation des valeurs de base de la cible.");
+            return (target.distanceTotale, target.recompenseEnMonnaie);
+        }
+
+        // 4. On regarde s'il existe une Mastery correspondante à cette cible
+        if (ownedUpgrades.TryGetValue("Mastery_" + target.distanceObjectId, out BaseGlobalUpgrade upgradeSO))
+        {
+            Debug.Log($"Amélioration trouvée pour l'ID : {upgradeSO.upgradeID}");
+
+            // On s’assure que le cast a bien fonctionné
+            if (upgradeSO is MasteryUpgrade masteryUpgrade)
+            {
+                (BigDouble masteryBonus, BigDouble rewardBonus) = masteryUpgrade.GetTotalMasteryBonus();
+                // Ici tu renvoies ce que ta Mastery calcule comme valeurs finales
+                return (masteryBonus, rewardBonus);
+            }
+            else
+            {
+                Debug.LogError($"L'upgrade {upgradeSO.upgradeID} n'est pas une MasteryUpgrade.");
+            }
+        }
+        else
+        {
+            Debug.LogError($"Aucune amélioration trouvée pour l'ID de Mastery : Mastery_{target.distanceObjectId}");
+        }
+
+        // 5. Par défaut : on utilise les stats de base de l’objet
+        return (target.distanceTotale, target.recompenseEnMonnaie);
     }
 }
