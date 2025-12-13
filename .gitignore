@@ -85,3 +85,7 @@ Assets/GeneratedLocalRepo/
 DistanceClicker_BackUpThisFolder_ButDontShipItWithYourGame/
 DistanceClicker_BurstDebugInformation_DoNotShip/
 Assets/_Recovery/
+
+#venv
+venv310/
+

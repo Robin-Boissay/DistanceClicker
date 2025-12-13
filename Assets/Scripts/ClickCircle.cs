@@ -12,7 +12,7 @@ public class ClickCircle : MonoBehaviour
     public float minTemps = 1f; // Plus court pour les grosses récompenses
     public float maxTemps = 3f;   // Plus long pour les petites récompenses
 
-    private float recompenseRatio;
+    public float recompenseRatio;
 
     // Variables internes
     private BigDouble recompenseDistance;

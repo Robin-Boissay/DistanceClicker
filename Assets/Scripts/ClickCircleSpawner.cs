@@ -9,6 +9,7 @@ public class ClickCircleSpawner : MonoBehaviour
     public GameObject clickCirclePrefab;
     public RectTransform zoneApparition; 
     public float tempsEntreApparitions;
+    public GameObject currentCircle;
 
     private Vector2 rondSize;
     private Coroutine spawnCoroutine; // Référence à notre coroutine en cours
@@ -84,8 +85,8 @@ public class ClickCircleSpawner : MonoBehaviour
             Random.Range(-safeHauteur, safeHauteur)
         );
 
-        GameObject nouveauRond = Instantiate(clickCirclePrefab, zoneApparition);
-        nouveauRond.GetComponent<RectTransform>().anchoredPosition = positionAleatoire;
+        currentCircle = Instantiate(clickCirclePrefab, zoneApparition);
+        currentCircle.GetComponent<RectTransform>().anchoredPosition = positionAleatoire;
     }
 
     /// <summary>
@@ -106,5 +107,35 @@ public class ClickCircleSpawner : MonoBehaviour
         // Relancer la coroutine avec le nouveau temps d'apparition
         // (cela fait apparaître un rond immédiatement, ce qui est un bon feedback)
         spawnCoroutine = StartCoroutine(SpawnLoopCoroutine());
+    }
+
+    /// <summary>
+    /// Appelé par l'Agent ML pour tenter de cliquer sur le cercle bonus.
+    /// Retourne true si un cercle était présent et a été cliqué.
+    /// </summary>
+    public bool TryClickActiveCircle()
+    {
+        if (currentCircle != null)
+        {
+            // On récupère le script de logique du cercle
+            var circleLogic = currentCircle.GetComponent<ClickCircle>();
+            
+            if (circleLogic != null)
+            {
+                // On appelle la méthode qui donne la récompense et lance l'anim
+                circleLogic.OnCircleClicked();
+            }
+            else
+            {
+                // Fallback si le script n'est pas trouvé
+                Destroy(currentCircle);
+                Debug.Log("Agent a détruit le cercle bonus (fallback)");
+            }
+
+            // On vide la référence, le cercle va se détruire via son anim ou le destroy
+            currentCircle = null; 
+            return true;
+        }
+        return false;
     }
 }

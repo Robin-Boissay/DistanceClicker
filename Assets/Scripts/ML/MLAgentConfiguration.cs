@@ -55,6 +55,17 @@ public class MLAgentConfiguration : ScriptableObject
     [Tooltip("Nombre d'améliorations à observer (max 10 recommandé)")]
     [Range(1, 10)]
     public int numberOfUpgradesToObserve = 5;
+
+    [Header("🧠 Comportement Humain")]
+    [Tooltip("Délai minimum de réaction avant de cliquer sur un cercle (secondes)")]
+    public float minReactionDelay = 0.5f;
+
+    [Tooltip("Délai maximum de réaction avant de cliquer sur un cercle (secondes)")]
+    public float maxReactionDelay = 1f;
+
+    [Tooltip("Chance spécifique de rater un clic sur un cercle bonus")]
+    [Range(0f, 1f)]
+    public float bonusMissClickChance = 0.2f; 
     
     [Header("🐛 Debug")]
     [Tooltip("Afficher les logs détaillés dans la console")]

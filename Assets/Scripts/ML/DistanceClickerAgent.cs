@@ -40,6 +40,10 @@ public class DistanceClickerAgent : Agent
     private float lastActionTime = 0f;
     private float nextUpgradePossibleTime = 0f;
     private float missClickChance;
+    // Pour le comportement humain (Bonus Circles)
+    private float bonusCircleAppearedTime = 0f;
+    private float currentReactionDelay = 0f;
+    private bool wasCircleActiveLastFrame = false;
     
     // Cache des upgrades pour optimisation
     private List<BaseGlobalUpgrade> observableUpgrades;
@@ -312,12 +316,19 @@ public class DistanceClickerAgent : Agent
         bool bonusIsActive = false;
         float bonusValueNorm = 0f;
         
-        if (circleSpawner != null)
+        if (circleSpawner != null && circleSpawner.currentCircle != null)
         {
-            // Note: Il faudrait exposer ces propriétés dans ClickCircleSpawner
-            // Pour l'instant, on met des valeurs par défaut
-            bonusIsActive = false;
-            bonusValueNorm = 0f;
+            bonusIsActive = true;
+            // On récupère la vraie valeur du cercle (ratio de récompense)
+            var circleLogic = circleSpawner.currentCircle.GetComponent<ClickCircle>();
+            if (circleLogic != null)
+            {
+                bonusValueNorm = circleLogic.recompenseRatio;
+            }
+            else
+            {
+                bonusValueNorm = 0.5f; // Valeur moyenne par défaut
+            }
         }
         
         sensor.AddObservation(bonusIsActive ? 1f : 0f);
@@ -554,9 +565,26 @@ public class DistanceClickerAgent : Agent
     /// </summary>
     private bool TryClickBonusCircle()
     {
-        // Il faudrait avoir accès au cercle actif dans ClickCircleSpawner
-        // Pour l'instant, on retourne false
-        // TODO: Ajouter une méthode publique dans ClickCircleSpawner pour cliquer le cercle actif
+        if (circleSpawner != null && circleSpawner.currentCircle != null)
+        {
+            // Vérification du délai de réaction humain
+            if (Time.time < bonusCircleAppearedTime + currentReactionDelay)
+            {
+                // L'agent essaie de cliquer mais c'est "trop tôt" par rapport à son temps de réaction
+                // On peut considérer ça comme une non-action ou un échec.
+                // Ici on retourne false pour dire "pas cliqué".
+                return false;
+            }
+
+            // Vérification du miss-click spécifique aux bonus
+            if (Random.value < config.bonusMissClickChance)
+            {
+                Debug.Log("Miss-click simulé sur le cercle bonus !");
+                return false;
+            }
+            
+            return circleSpawner.TryClickActiveCircle();
+        }
         return false;
     }
     
@@ -636,6 +664,22 @@ public class DistanceClickerAgent : Agent
         if (forceRealtime && Time.timeScale != 1f)
         {
             Time.timeScale = 1f;
+        }
+        
+        // Gestion du tracking d'apparition des cercles pour le temps de réaction
+        if (circleSpawner != null)
+        {
+            bool isCircleActive = circleSpawner.currentCircle != null;
+            
+            if (isCircleActive && !wasCircleActiveLastFrame)
+            {
+                // Le cercle vient d'apparaître
+                bonusCircleAppearedTime = Time.time;
+                // On détermine le temps de réaction pour CE cercle spécifiquement
+                currentReactionDelay = Random.Range(config.minReactionDelay, config.maxReactionDelay);
+            }
+            
+            wasCircleActiveLastFrame = isCircleActive;
         }
         
         // Incrémenter le timer d'épisode
