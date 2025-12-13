@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41a09239795813249851ab65ea6418a9, type: 3}
   m_Name: MLAgentConfig
   m_EditorClassIdentifier: Assembly-CSharp::MLAgentConfiguration
-  maxEpisodeDuration: 120
+  maxEpisodeDuration: 600
   targetCompletionReward: 1
   upgradePurchaseReward: 0.2
   clickReward: 0.01
@@ -25,8 +25,12 @@ MonoBehaviour:
   maxTargetRewardForNormalization: 100000
   maxUpgradeCostForNormalization: 100000
   maxUpgradeLevelForNormalization: 20
-  numberOfUpgradesToObserve: 5
+  numberOfUpgradesToObserve: 15
   verboseLogging: 0
   logObservations: 0
   logActions: 0
   logRewards: 0
+  minReactionDelay: 0.5
+  maxReactionDelay: 1
+  bonusMissClickChance: 0.2
+  maxActionsPerSecond: 5

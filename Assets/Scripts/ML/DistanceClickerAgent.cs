@@ -24,8 +24,9 @@ public class DistanceClickerAgent : Agent
     [Tooltip("Forcer le temps réel (Time.timeScale = 1) pendant l'entraînement")]
     [SerializeField] private bool forceRealtime = false;
 
-    [Tooltip("Forcer l'agent à n'effectuer que 4 actions/sec")]
-    [SerializeField] private float minActionInterval = 0.25f;
+
+
+    // minActionInterval est maintenant géré par confi.maxActionsPerSecond
 
     [Tooltip("Délai avant de prendre une décision (upgrade)")]
     [SerializeField] private float upgradeDecisionDelay = 0.5f;
@@ -170,18 +171,26 @@ public class DistanceClickerAgent : Agent
     {
         observableUpgrades = new List<BaseGlobalUpgrade>();
         
-        if (shopManager.allUpgrades == null) return;
+        // CORRECTION: Utiliser StatsManager qui contient la vraie liste utilisée par le jeu
+        if (statsManager.allUpgradesDatabase == null) return;
         
-        // Filtrer pour n'avoir que les StatsUpgrade (pas les MasteryUpgrade ni DistanceObjectUpgrade)
-        var statsUpgrades = shopManager.allUpgrades
-            .Where(u => u is StatsUpgrade)
+        // Filtrer pour avoir les StatsUpgrade ET les MasteryUpgrade
+        var upgrades = statsManager.allUpgradesDatabase
+            .Where(u => u is StatsUpgrade || u is BaseMasteryUpgrade)
             .Take(config.numberOfUpgradesToObserve)
             .ToList();
         
-        observableUpgrades.AddRange(statsUpgrades);
+        observableUpgrades.AddRange(upgrades);
         
         if (config.verboseLogging)
             Debug.Log($"Cache d'upgrades observables créé : {observableUpgrades.Count} upgrades");
+            
+        if (observableUpgrades.Count == 0)
+        {
+            Debug.LogError("ATTENTION: Aucune upgrade trouvée dans le cache !");
+            Debug.LogError($"StatsManager.allUpgradesDatabase est null ? {statsManager.allUpgradesDatabase == null}");
+            if (statsManager.allUpgradesDatabase != null) Debug.LogError($"StatsManager.allUpgradesDatabase.Count: {statsManager.allUpgradesDatabase.Count}");
+        }
     }
     
     /// <summary>
@@ -433,8 +442,9 @@ public class DistanceClickerAgent : Agent
     /// </summary>
     public override void OnActionReceived(ActionBuffers actions)
     {
-        // Limitation de la fréquence d'action
-        if (Time.time - lastActionTime < minActionInterval)
+        // Limitation de la fréquence d'action basée sur la config
+        float interval = 1f / (config != null ? config.maxActionsPerSecond : 5f);
+        if (Time.time - lastActionTime < interval)
             return;
         
         lastActionTime = Time.time;
@@ -479,7 +489,7 @@ public class DistanceClickerAgent : Agent
         }
         
         // ==== ACTION D'ACHAT ====
-        if (upgradeAction >= 0 && upgradeAction < observableUpgrades.Count)
+        if (observableUpgrades != null && upgradeAction >= 0 && upgradeAction < observableUpgrades.Count)
         {
             if (Time.time >= nextUpgradePossibleTime)
             {
@@ -605,12 +615,20 @@ public class DistanceClickerAgent : Agent
             return false;
         
         BaseGlobalUpgrade upgrade = observableUpgrades[upgradeIndex];
-        if (upgrade == null)
-            return false;
+        if (upgrade == null) return false;
         
         // Vérifier si on peut acheter
         if (!upgrade.IsRequirementsMet())
             return false;
+
+        // VERIFICATION SUPPLEMENTAIRE pour les Maîtrises
+        if (upgrade is BaseMasteryUpgrade masteryParams)
+        {
+            if (distanceManager.GetCurrentTarget() != masteryParams.targetWhereMasteryApplies)
+            {
+                return false;
+            }
+        }
         
         BigDouble cost = upgrade.GetCurrentCost();
         

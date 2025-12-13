@@ -10,7 +10,7 @@ public class MLAgentConfiguration : ScriptableObject
 {
     [Header("⏱️ Paramètres d'épisode")]
     [Tooltip("Durée maximale d'un épisode en secondes")]
-    public float maxEpisodeDuration = 120f;
+    public float maxEpisodeDuration = 600f;
     
     [Header("🏆 Récompenses positives")]
     [Tooltip("Récompense pour avoir complété une cible")]
@@ -52,9 +52,9 @@ public class MLAgentConfiguration : ScriptableObject
     [Tooltip("Nombre maximum de niveaux pour normaliser les améliorations")]
     public int maxUpgradeLevelForNormalization = 20;
     
-    [Tooltip("Nombre d'améliorations à observer (max 10 recommandé)")]
-    [Range(1, 10)]
-    public int numberOfUpgradesToObserve = 5;
+    [Tooltip("Nombre d'améliorations à observer (max 20 recommandé)")]
+    [Range(1, 20)]
+    public int numberOfUpgradesToObserve = 15;
 
     [Header("🧠 Comportement Humain")]
     [Tooltip("Délai minimum de réaction avant de cliquer sur un cercle (secondes)")]
@@ -66,6 +66,10 @@ public class MLAgentConfiguration : ScriptableObject
     [Tooltip("Chance spécifique de rater un clic sur un cercle bonus")]
     [Range(0f, 1f)]
     public float bonusMissClickChance = 0.2f; 
+
+    [Tooltip("Nombre maximum d'actions par seconde (pour simuler un humain)")]
+    [Range(1, 20)]
+    public int maxActionsPerSecond = 5; 
     
     [Header("🐛 Debug")]
     [Tooltip("Afficher les logs détaillés dans la console")]
@@ -112,7 +116,7 @@ public class MLAgentConfiguration : ScriptableObject
     [ContextMenu("Reset to Default Values")]
     public void ResetToDefault()
     {
-        maxEpisodeDuration = 120f;
+        maxEpisodeDuration = 600f;
         targetCompletionReward = 1.0f;
         upgradePurchaseReward = 0.2f;
         clickReward = 0.01f;
@@ -127,7 +131,7 @@ public class MLAgentConfiguration : ScriptableObject
         maxUpgradeCostForNormalization = 100000.0;
         
         maxUpgradeLevelForNormalization = 20;
-        numberOfUpgradesToObserve = 5;
+        numberOfUpgradesToObserve = 15;
         
         verboseLogging = false;
         logObservations = false;
