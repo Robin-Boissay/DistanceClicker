@@ -112,4 +112,47 @@ public class ClickCircle : MonoBehaviour
         // Détruit l'objet
         Destroy(gameObject);
     }
+
+    /// <summary>
+    /// Version alternative pour les environnements ML isolés.
+    /// Appelé par LocalClickCircleSpawner.TryClickActiveCircle()
+    /// </summary>
+    public void OnCircleClickedByEnvironment(GameEnvironment environment)
+    {
+        if (environment == null)
+        {
+            // Fallback vers le comportement normal
+            OnCircleClicked();
+            return;
+        }
+
+        if (circleAnimator != null)
+        {
+            circleAnimator.SetTrigger("onClick");
+        }
+
+        // Calculer la récompense basée sur les stats de l'environnement local
+        if (environment.StatsManager != null && environment.PlayerData != null)
+        {
+            BigDouble localDPC = environment.StatsManager.GetStat(StatToAffect.DPC);
+            BigDouble enchanteur = environment.StatsManager.GetStat(StatToAffect.EnchenteurMultiplier);
+            BigDouble minMult = environment.StatsManager.GetStat(StatToAffect.MinRewardsMultiplierCircle);
+            BigDouble maxMult = environment.StatsManager.GetStat(StatToAffect.MaxRewardsMultiplierCircle);
+
+            BigDouble localMin = localDPC * minMult * (1 + enchanteur / 100);
+            BigDouble localMax = localDPC * maxMult * (1 + enchanteur / 100);
+
+            BigDouble localReward = localMin + (localMax - localMin) * recompenseRatio;
+
+            // Donner l'expérience et la distance à l'environnement local
+            environment.PlayerData.AddExperience(localReward);
+            
+            if (environment.DistanceManager != null)
+            {
+                environment.DistanceManager.AddDistance(localReward);
+            }
+        }
+
+        // Note: L'animation détruira l'objet via DestroyCircleWhenClicked.cs
+    }
 }

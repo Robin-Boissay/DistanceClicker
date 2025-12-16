@@ -38,6 +38,9 @@ public class DistanceManager : MonoBehaviour
 
     private BigDouble DistanceTotalCibleActuelle;
     private BigDouble RewardTotalCibleActuelle;
+    
+    // Distance totale parcourue depuis le début (pour le classement)
+    private BigDouble distanceTotaleParcourue = new BigDouble(0);
 
     private int MaxLevelMonsterAvaible = 0;
 
@@ -80,6 +83,7 @@ public class DistanceManager : MonoBehaviour
         if (cibleActuelle == null) return;
 
         distanceParcourueSurCibleActuelle += amount;
+        distanceTotaleParcourue += amount; // Tracker pour le classement
 
         // CORRIGÉ : Utilise la distance totale calculée pour l'UI
         OnDistanceChanged?.Invoke(distanceParcourueSurCibleActuelle, DistanceTotalCibleActuelle);
@@ -87,11 +91,6 @@ public class DistanceManager : MonoBehaviour
         // CORRIGÉ : Utilise la distance totale calculée pour la vérification
         if (distanceParcourueSurCibleActuelle >= DistanceTotalCibleActuelle)
         {
-            // Le Debug.Log de ton ancien code aurait dû te montrer :
-            // Debug.Log(distanceParcourueSurCibleActuelle); // Ex: 151
-            // Debug.Log(cibleActuelle.distanceTotale);     // Ex: 100 (la base)
-            // Debug.Log(distanceParcourueSurCibleActuelle >= cibleActuelle.distanceTotale); // True (trop tôt !)
-
             CompleteTarget();
         }
     }
@@ -103,6 +102,22 @@ public class DistanceManager : MonoBehaviour
     public BigDouble GetRewardTotalCibleActuelle()
     {
         return RewardTotalCibleActuelle;
+    }
+
+    /// <summary>
+    /// Récupère la distance parcourue sur la cible actuelle.
+    /// </summary>
+    public BigDouble GetDistanceParcourueCibleActuel()
+    {
+        return distanceParcourueSurCibleActuelle;
+    }
+    
+    /// <summary>
+    /// Récupère la distance totale parcourue depuis le début du jeu.
+    /// </summary>
+    public BigDouble GetDistanceTotaleParcourue()
+    {
+        return distanceTotaleParcourue;
     }
 
     public void SetMaxLevelMonsterAvaible(int level)
