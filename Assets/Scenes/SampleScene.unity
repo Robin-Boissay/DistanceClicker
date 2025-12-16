@@ -1812,7 +1812,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 34cd04f992f928b49bbba38ae8c4812f, type: 2}
   premiereCible: {fileID: 11400000, guid: 2a1fdb7826e08ef4da46a40799d10ca3, type: 2}
   environmentsParent: {fileID: 0}
-  numberOfMLAgentsToCreate: 10
+  numberOfMLAgentsToCreate: 2
   autoCreateOnStart: 1
 --- !u!4 &407678536
 Transform:
@@ -3337,7 +3337,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -4.999695, y: 0}
+  m_AnchoredPosition: {x: -4.9997253, y: 0}
   m_SizeDelta: {x: -20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &796875764
@@ -5127,7 +5127,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 30388156}
   m_HandleRect: {fileID: 30388155}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -6602,6 +6602,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1659011590}
+  - component: {fileID: 1659011591}
   m_Layer: 0
   m_Name: CompetitionUITest
   m_TagString: Untagged
@@ -6624,6 +6625,25 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1659011591
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1659011589}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 814d362d8dc51aa4a91877403d2df58f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CompetitionUITest
+  refreshInterval: 0.5
+  leaderboardContainer: {fileID: 0}
+  leaderboardRowPrefab: {fileID: 0}
+  playerRankText: {fileID: 0}
+  playerDistanceText: {fileID: 0}
+  totalParticipantsText: {fileID: 0}
+  showDebugLogs: 1
 --- !u!1 &1711235931
 GameObject:
   m_ObjectHideFlags: 0
@@ -6897,7 +6917,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 70.7
+  m_fontSize: 70.75
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -7486,7 +7506,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 50.9
+  m_fontSize: 50.85
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
