@@ -34,8 +34,8 @@ public class ClickCircle : MonoBehaviour
 
         playerData = StatsManager.Instance.currentPlayerData;
 
-        minRecompense = new BigDouble(StatsManager.Instance.GetStat(StatToAffect.DPC) * StatsManager.Instance.GetStat(StatToAffect.MinRewardsMultiplierCircle)) * (1 + StatsManager.Instance.GetStat(StatToAffect.EnchenteurMultiplier)/100);
-        maxRecompense = new BigDouble(StatsManager.Instance.GetStat(StatToAffect.DPC) * StatsManager.Instance.GetStat(StatToAffect.MaxRewardsMultiplierCircle)) * (1 + StatsManager.Instance.GetStat(StatToAffect.EnchenteurMultiplier)/100);
+        minRecompense = new BigDouble(StatsManager.Instance.GetStat(StatToAffect.DPC) * StatsManager.Instance.GetStat(StatToAffect.MinRewardsMultiplierCircle));
+        maxRecompense = new BigDouble(StatsManager.Instance.GetStat(StatToAffect.DPC) * StatsManager.Instance.GetStat(StatToAffect.MaxRewardsMultiplierCircle));
 
         // 1. Détermination de la valeur aléatoire de la récompense
         float randomRatio = Random.Range(0f, 1f); // génère un float entre 0.00 et 1.00
@@ -92,6 +92,9 @@ public class ClickCircle : MonoBehaviour
     {
         if (gameManager != null)
         {
+            //Désacitve l'objet mais laisse l'animation se jouer
+            gameObject.SetActive(false);
+
             circleAnimator.SetTrigger("onClick");
 
             // 1. Donne la récompense

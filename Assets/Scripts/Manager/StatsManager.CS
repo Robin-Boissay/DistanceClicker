@@ -11,7 +11,9 @@ public enum StatToAffect
     SpawnRateCircle,
     MinRewardsMultiplierCircle,
     MaxRewardsMultiplierCircle,
-    EnchenteurMultiplier
+    EnchenteurMultiplier,
+    PresitgeDPCMutiplier,
+    PrestigeDPSMutiplier
 }
 
 public class StatsManager : MonoBehaviour
@@ -97,7 +99,24 @@ public class StatsManager : MonoBehaviour
 
         calculatedStats[StatToAffect.EnchenteurMultiplier] = new BigDouble(0);
 
+        calculatedStats[StatToAffect.PresitgeDPCMutiplier] = new BigDouble(0);
+        calculatedStats[StatToAffect.PrestigeDPSMutiplier] = new BigDouble(0);
+
         // (Pour toute nouvelle stat, tu ajoutes sa valeur de base ici)
+    }
+
+    //GetUpgradeByID
+    public BaseGlobalUpgrade GetUpgradeByID(string upgradeID)
+    {
+        if (upgradeMap.TryGetValue(upgradeID, out BaseGlobalUpgrade upgradeSO))
+        {
+            return upgradeSO;
+        }
+        else
+        {
+            Debug.LogError($"Upgrade ID '{upgradeID}' non trouvé dans la base de données.");
+            return null;
+        }
     }
     
     public Dictionary<string, BaseGlobalUpgrade> GetUpgradeMap()
@@ -144,11 +163,15 @@ public class StatsManager : MonoBehaviour
             }
         }
 
-        // 7. Gérer les "caps" (ex: SpawnRate ne peut pas être < 0.5s)
+        // 7. Gérer les "caps" (ex: SpawnRate ne peut pas être < 0.2s)
         if (calculatedStats[StatToAffect.SpawnRateCircle] < 0.2)
         {
             calculatedStats[StatToAffect.SpawnRateCircle] = new BigDouble(0.2);
         }
+
+        
+        calculatedStats[StatToAffect.DPC] *= (1 + GetStat(StatToAffect.EnchenteurMultiplier)/100) * (1 + GetStat(StatToAffect.PresitgeDPCMutiplier));
+        calculatedStats[StatToAffect.DPS] *= (1 + GetStat(StatToAffect.EnchenteurMultiplier)/100) * (1 + GetStat(StatToAffect.PrestigeDPSMutiplier));
 
         if(IdleManager.Instance != null)
         {

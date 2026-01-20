@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
     public LeaderboardManager leaderboardManager;
     public ProfileSettingManager profileSettingManager;
     public IdleManager idleManager;
+    public PrestigeManager prestigeManager;
 
     void Awake()
     {

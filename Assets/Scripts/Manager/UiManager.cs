@@ -129,8 +129,8 @@ public class UIManager : MonoBehaviour
     public void UpdateGeneralUI()
     {
         distanceMonnaieText.text = NumberFormatter.Format(StatsManager.Instance.currentPlayerData.monnaiePrincipale) + " $"; // Unité plus logique
-        dpcText.text = "DPC: " + NumberFormatter.Format(StatsManager.Instance.GetStat(StatToAffect.DPC) * (1 + StatsManager.Instance.GetStat(StatToAffect.EnchenteurMultiplier)/100));
-        dpsText.text = "DPS: " + NumberFormatter.Format(StatsManager.Instance.GetStat(StatToAffect.DPS) * (1 + StatsManager.Instance.GetStat(StatToAffect.EnchenteurMultiplier)/100));
+        dpcText.text = "DPC: " + NumberFormatter.Format(StatsManager.Instance.GetStat(StatToAffect.DPC));
+        dpsText.text = "DPS: " + NumberFormatter.Format(StatsManager.Instance.GetStat(StatToAffect.DPS));
         levelText.text = "Niveau: " + ConvertExpToLevel.GetLevelFromExp(StatsManager.Instance.currentPlayerData.expJoueur);
     }
 

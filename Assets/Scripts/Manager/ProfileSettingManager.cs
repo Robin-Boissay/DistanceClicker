@@ -131,6 +131,7 @@ public class ProfileSettingManager : MonoBehaviour
         {
             Debug.Log("Ouverture des settings");
             settingboardAnimator.SetTrigger("OpenSettings");
+            PrestigeManager.Instance.UpdatePrestigeUI();
         }
         else
         {

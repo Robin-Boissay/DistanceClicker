@@ -223,7 +223,7 @@ public class DistanceManager : MonoBehaviour
     public void ClickAction()
     {
         // Ajouter la distanceParClic au score
-        BigDouble distance = StatsManager.Instance.GetStat(StatToAffect.DPC) * (1 + StatsManager.Instance.GetStat(StatToAffect.EnchenteurMultiplier)/100);
+        BigDouble distance = StatsManager.Instance.GetStat(StatToAffect.DPC);
         AddDistance(distance);
         //clickWholeAreaAnimator.SetTrigger("clickWholeArea");
     }

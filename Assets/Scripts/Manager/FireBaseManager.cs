@@ -24,9 +24,6 @@ public class FirebaseManager : MonoBehaviour
     [Header("Statut")]
     public bool isFirebaseReady = false;
 
-    // --- NOTE ---
-    // J'utilise "Start()" ici, mais si tu as créé le Bootstrapper,
-    // remplace "private async void Start()" par "public async Task InitializeAsync()"
     public async Task InitializeAsync()
     {
 
@@ -39,8 +36,6 @@ public class FirebaseManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
-        //Debug.Log("FirebaseManager: Initialisation en cours...");
 
         await FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(async task =>
         {

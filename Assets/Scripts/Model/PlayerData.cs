@@ -12,6 +12,9 @@ public class PlayerData
 
     public BigDouble monnaiePrincipale;
     public BigDouble expJoueur;
+    public BigDouble prestigeCurrency;
+    public BigDouble totalPrestigeCurrencyEarned;
+    public int prestigeCount;
     private Dictionary<string, int> upgradeLevels;
     
     // L'événement qui préviendra le StatsManager
@@ -112,6 +115,21 @@ public class PlayerData
     }
 
 
+    /// <summary>
+    /// Dépense de l'exp 
+    /// </summary>
+    public bool SpendPrestigeCurrency(BigDouble amount)
+    {
+        if (prestigeCurrency >= amount)
+        {
+            prestigeCurrency -= amount;
+            NotifyChange(); // On prévient l'UI de la monnaie !
+            return true;
+        }
+        return false;
+    }
+
+
 
     /// <summary>
     /// Convertit cet objet PlayerData en un Dictionnaire
@@ -143,6 +161,27 @@ public class PlayerData
         };
 
 
+
+        Dictionary<string, object> prestigeCurrencyData = new Dictionary<string, object>
+        {
+            { "mantissa", prestigeCurrency.GetMantissa() },
+            { "exponent", prestigeCurrency.GetExponent() }
+        };
+        Dictionary<string, object> totalPrestigeCurrencyEarnedData = new Dictionary<string, object>
+        {
+            { "mantissa", totalPrestigeCurrencyEarned.GetMantissa() },
+            { "exponent", totalPrestigeCurrencyEarned.GetExponent() }
+        };
+        // 2. Gérer les prestige données
+        Dictionary<string, object> prestigeData = new Dictionary<string, object>
+        {
+            { "prestigeCurrency", prestigeCurrencyData },
+            { "totalPrestigeCurrencyEarned", totalPrestigeCurrencyEarnedData },
+            { "prestigeCount", prestigeCount }
+            // Tu peux aussi ajouter "derniereConnexion" ici
+        };
+
+
         // 3. Créer l'objet principal à envoyer
         Dictionary<string, object> data = new Dictionary<string, object>
         {
@@ -150,6 +189,7 @@ public class PlayerData
             { "expJoueur", experienceData },
             { "metadata", metadata },
             { "username", username },
+            { "prestigeData", prestigeData },
             // C'est là que c'est magique :
             // Pas besoin de listes ! On envoie le Dictionnaire directement.
             { "upgrades", upgradeLevels } 
@@ -213,6 +253,40 @@ public class PlayerData
             }
         }
 
+        if( data.TryGetValue("prestigeData", out object prestigeObj))
+        {
+            Dictionary<string, object> prestigeMap = prestigeObj as Dictionary<string, object>;
+            if (prestigeMap != null)
+            {
+                if (prestigeMap.TryGetValue("prestigeCurrency", out object prestigeCurrencyObj))
+                {
+                    Dictionary<string, object> prestigeCurrencyMap = prestigeCurrencyObj as Dictionary<string, object>;
+                    if (prestigeCurrencyMap != null && prestigeCurrencyMap.ContainsKey("mantissa") && prestigeCurrencyMap.ContainsKey("exponent"))
+                    {
+                        double mantissa = Convert.ToDouble(prestigeCurrencyMap["mantissa"]);
+                        long exponent = Convert.ToInt64(prestigeCurrencyMap["exponent"]);
+
+                        this.prestigeCurrency = new BigDouble(mantissa, (int)exponent);
+                    }
+                }
+                if (prestigeMap.TryGetValue("totalPrestigeCurrencyEarned", out object totalPrestigeCurrencyEarnedObj))
+                {
+                   Dictionary<string, object> totalPrestigeCurrencyEarnedMap = totalPrestigeCurrencyEarnedObj as Dictionary<string, object>;
+                    if (totalPrestigeCurrencyEarnedMap != null && totalPrestigeCurrencyEarnedMap.ContainsKey("mantissa") && totalPrestigeCurrencyEarnedMap.ContainsKey("exponent"))
+                    {
+                        double mantissa = Convert.ToDouble(totalPrestigeCurrencyEarnedMap["mantissa"]);
+                        long exponent = Convert.ToInt64(totalPrestigeCurrencyEarnedMap["exponent"]);
+
+                        this.totalPrestigeCurrencyEarned = new BigDouble(mantissa, (int)exponent);
+                    }
+                }
+                if (prestigeMap.TryGetValue("prestigeCount", out object prestigeCountObj))
+                {
+                    this.prestigeCount = Convert.ToInt32(prestigeCountObj);
+                }
+            }
+        }
+
         string finalName = "";
 
         // ÉTAPE A : Vérifier le profil Auth (Priorité Max)
@@ -253,5 +327,41 @@ public class PlayerData
 
         // 4. Notifie l'UI que les données sont prêtes !
         NotifyChange();
+    }
+
+    /// <summary>
+    /// Effectue le "Soft Reset" : on garde le prestige, on efface le reste.
+    /// </summary>
+    public void SoftResetForPrestige()
+    {
+        // 1. Réinitialiser la monnaie standard (Distance/Argent)
+        // currentMoney = 0; // Remplace par ta variable réelle
+        // currentDistance = 0;
+
+        // 2. Réinitialiser les upgrades CLASSIQUES seulement
+        // On recrée un dictionnaire vide ou on remet les niveaux à 0
+        // Boucler sur les upgrade du joueur dans StatsManager.Instance.GetUpgradeMap() et ne garder que les prestige
+        foreach (string key in new List<string>(upgradeLevels.Keys))
+        {
+            BaseGlobalUpgrade upgradeSO = StatsManager.Instance.GetUpgradeByID(key);
+            if (upgradeSO is PrestigeUpgradeSO)
+            {
+                // Garde le niveau tel quel
+                continue;
+            }
+            else
+            {
+                // Réinitialise le niveau
+                upgradeLevels[key] = 0;
+            }
+        }
+        monnaiePrincipale = new BigDouble(0);
+        expJoueur = new BigDouble(0);
+        NotifyChange();
+        // 3. Réinitialiser la progression des cibles (revenir à l'Atome)
+        // currentTargetIndex = 0;
+
+        // NOTE : On NE touche PAS à 'prestigeCurrency', 'ownedPrestigeUpgrades', etc.
+        // NOTE : On NE touche PAS aux Settings ou au Username.
     }
 }
