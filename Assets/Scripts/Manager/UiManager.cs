@@ -84,7 +84,7 @@ public class UIManager : MonoBehaviour
             {
                 // 5. Instancier le bouton dans le bon panneau
                 GameObject itemGO = Instantiate(shopItemPrefab, targetPanel);
-
+                
                 // 5.b Informer le ShopManager de cette nouvelle instance, a pour effet d'ajouter l'item à la liste de gestion
                 ShopManager.instance.InstantiateItem(upgradeSO, itemGO.GetComponent<ShopItemUI>());
                 

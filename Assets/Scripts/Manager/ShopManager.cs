@@ -9,9 +9,7 @@ public class ShopManager : MonoBehaviour
     public static ShopManager instance;
 
     [Header("Contrôle du Panel Shop")]
-    [SerializeField] private GameObject shopPanel; // Référence au GameObject ShopPanel
-    [SerializeField] private Button shopButton;    // Référence au bouton qui ouvre/ferme
-    [SerializeField] private Animator shopAnimator; // Référence à l'Animator du ShopPanel
+    [SerializeField] private Animator shopAnimator;
     private bool isShopOpen = false; // État actuel du shop
 
     [Header("Références des Onglets")]
@@ -56,9 +54,6 @@ public class ShopManager : MonoBehaviour
             Destroy(gameObject);
         }
 
-         // Validation des références de base
-        if (shopPanel == null) Debug.LogError("ShopPanel n'est pas assigné.");
-        if (shopButton == null) Debug.LogError("ShopButton n'est pas assigné.");
         if (shopAnimator == null) Debug.LogError("ShopAnimator n'est pas assigné.");
 
         // Validation des nouvelles références d'onglets
@@ -71,13 +66,6 @@ public class ShopManager : MonoBehaviour
         if (globalUpgradesParent == null) Debug.LogError("GlobalUpgradesParent n'est pas assigné.");
         if (masteryUpgradesParent == null) Debug.LogError("MasteryUpgradesParent n'est pas assigné.");
         if (prestigeUpgradesParent == null) Debug.LogError("PrestigeUpgradesParent n'est pas assigné.");
-
-        // Attachez l'écouteur de clic au bouton principal
-        if (shopButton != null)
-        {
-            shopButton.onClick.AddListener(ToggleShop);
-        }
-
         // Attachez les écouteurs pour les boutons d'onglets
         if (globalTabButton != null)
         {
@@ -145,6 +133,7 @@ public class ShopManager : MonoBehaviour
         // ACTION : On ferme le shop (Toggle).
         if (isShopOpen && currentTab == tabClicked)
         {
+            UpdateTabVisuals(tabClicked, true); // Remettre le bouton en blanc avant de fermer
             ToggleShop();
             //Remettre en blanc le bouton
             
@@ -158,7 +147,7 @@ public class ShopManager : MonoBehaviour
     /// <summary>
     /// Gère l'activation/désactivation des objets et les couleurs.
     /// </summary>
-    private void UpdateTabVisuals(ShopCategory tabToActivate)
+    private void UpdateTabVisuals(ShopCategory tabToActivate, bool isClosing = false)
     {
         currentTab = tabToActivate; // On mémorise le nouvel onglet actif
 
@@ -167,12 +156,18 @@ public class ShopManager : MonoBehaviour
         masteryTabPanel.SetActive(tabToActivate == ShopCategory.Mastery);
         prestigeTabPanel.SetActive(tabToActivate == ShopCategory.Prestige);
 
-        // 2. Mettre à jour les couleurs (Gris = Actif, Blanc = Inactif)
+        // 2. Mettre à jour les couleurs (Gris = Actif, Blanc = Inactif), si isClosing est vrai alors tout mettre à blanc
+        if (isClosing)
+        {
+            globalTabButton.GetComponent<Image>().color = Color.white;
+            masteryTabButton.GetComponent<Image>().color = Color.white;
+            prestigeTabButton.GetComponent<Image>().color = Color.white;
+            return;
+        }
         globalTabButton.GetComponent<Image>().color = (tabToActivate == ShopCategory.Global) ? Color.gray : Color.white;
         masteryTabButton.GetComponent<Image>().color = (tabToActivate == ShopCategory.Mastery) ? Color.gray : Color.white;
         prestigeTabButton.GetComponent<Image>().color = (tabToActivate == ShopCategory.Prestige) ? Color.gray : Color.white;
         
-        // Si tu as des titres à changer, fais-le ici aussi
     }
 
    
