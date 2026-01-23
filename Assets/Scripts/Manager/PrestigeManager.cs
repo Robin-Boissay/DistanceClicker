@@ -14,6 +14,8 @@ public class PrestigeManager : MonoBehaviour
     public BigDouble prestigeDivisor = new BigDouble(100000);
     public Button prestigeButton;
     public TextMeshProUGUI prestigeButtonText;
+    public TextMeshProUGUI prestigeCurrencyText;
+
 
     private void Awake()
     {
@@ -66,10 +68,10 @@ public class PrestigeManager : MonoBehaviour
 
         // 4. Mettre à jour tout le jeu
         // On demande à tous les managers de se "rafraîchir"
-        RefreshGameAfterPrestige();
+        RefreshGameAfterPrestige(gain);
     }
 
-    private void RefreshGameAfterPrestige()
+    private void RefreshGameAfterPrestige(BigDouble gain)
     {
         // Recalculer les stats (qui seront très basses maintenant)
         StatsManager.Instance.RecalculateAllStats();
@@ -83,7 +85,7 @@ public class PrestigeManager : MonoBehaviour
         // Reset de la distance
         //DistanceManager.instance.ResetDistance(); 
 
-        Debug.Log($"<color=purple>PRESTIGE EFFECTUÉ ! Gain : {CalculatePrestigeGain()} Fragments.</color>");
+        Debug.Log($"<color=purple>PRESTIGE EFFECTUÉ ! Gain : {gain} Fragments.</color>");
     }
 
     public void UpdatePrestigeUI()
@@ -99,5 +101,7 @@ public class PrestigeManager : MonoBehaviour
             prestigeButton.interactable = true;
             prestigeButtonText.text = "Prestige (" + NumberFormatter.Format(gain) + " Fragments)";
         }
+        prestigeCurrencyText.text = "Fragments: " + NumberFormatter.Format(StatsManager.Instance.currentPlayerData.prestigeCurrency);
+        Debug.Log("UI de Prestige mise à jour.");
     }
 }

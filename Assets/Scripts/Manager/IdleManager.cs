@@ -47,7 +47,7 @@ public class IdleManager : MonoBehaviour
 
     public void ActualiseDPS()
     {
-        Debug.Log("IdleManager: Actualisation du DPS depuis StatsManager.");
+        //Debug.Log("IdleManager: Actualisation du DPS depuis StatsManager.");
         ActualDPS = StatsManager.Instance.calculatedStats[StatToAffect.DPS];
     }
 }

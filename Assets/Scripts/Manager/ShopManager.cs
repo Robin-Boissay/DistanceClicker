@@ -183,7 +183,10 @@ public class ShopManager : MonoBehaviour
 
     public void ShowPrestigeTab()
     {
+        Debug.Log("ShopManager: Clic sur l'onglet Prestige.");
         HandleTabClick(ShopCategory.Prestige);
+        PrestigeManager.Instance.UpdatePrestigeUI();
+
     }
 
     // --- LOGIQUE DU SHOP (ACHAT ET AFFICHAGE) ---

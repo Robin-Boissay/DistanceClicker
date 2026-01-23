@@ -12,8 +12,8 @@ public enum StatToAffect
     MinRewardsMultiplierCircle,
     MaxRewardsMultiplierCircle,
     EnchenteurMultiplier,
-    PresitgeDPCMutiplier,
-    PrestigeDPSMutiplier
+    PrestigeDPCMultiplier,
+    PrestigeDPSMultiplier
 }
 
 public class StatsManager : MonoBehaviour
@@ -99,8 +99,8 @@ public class StatsManager : MonoBehaviour
 
         calculatedStats[StatToAffect.EnchenteurMultiplier] = new BigDouble(0);
 
-        calculatedStats[StatToAffect.PresitgeDPCMutiplier] = new BigDouble(0);
-        calculatedStats[StatToAffect.PrestigeDPSMutiplier] = new BigDouble(0);
+        calculatedStats[StatToAffect.PrestigeDPCMultiplier] = new BigDouble(0);
+        calculatedStats[StatToAffect.PrestigeDPSMultiplier] = new BigDouble(0);
 
         // (Pour toute nouvelle stat, tu ajoutes sa valeur de base ici)
     }
@@ -169,9 +169,9 @@ public class StatsManager : MonoBehaviour
             calculatedStats[StatToAffect.SpawnRateCircle] = new BigDouble(0.2);
         }
 
-        
-        calculatedStats[StatToAffect.DPC] *= (1 + GetStat(StatToAffect.EnchenteurMultiplier)/100) * (1 + GetStat(StatToAffect.PresitgeDPCMutiplier));
-        calculatedStats[StatToAffect.DPS] *= (1 + GetStat(StatToAffect.EnchenteurMultiplier)/100) * (1 + GetStat(StatToAffect.PrestigeDPSMutiplier));
+
+        calculatedStats[StatToAffect.DPC] *= (1 + GetStat(StatToAffect.EnchenteurMultiplier)/100) * (1 + GetStat(StatToAffect.PrestigeDPCMultiplier));
+        calculatedStats[StatToAffect.DPS] *= (1 + GetStat(StatToAffect.EnchenteurMultiplier)/100) * (1 + GetStat(StatToAffect.PrestigeDPSMultiplier));
 
         if(IdleManager.Instance != null)
         {

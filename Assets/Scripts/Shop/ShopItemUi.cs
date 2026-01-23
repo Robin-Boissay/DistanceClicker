@@ -146,6 +146,12 @@ public class ShopItemUI : MonoBehaviour
             else if(currentStatUpgrade.statToAffect == StatToAffect.DPS){
                 effectText.text = " DPS + " + NumberFormatter.Format(currentStatUpgrade.GetStatBonusForLevel(currentStatUpgrade.GetLevel()));
             }
+            else if(currentStatUpgrade.statToAffect == StatToAffect.PrestigeDPSMultiplier){
+                canAfford = playerData.prestigeCurrency >= cost;
+            }
+            else if(currentStatUpgrade.statToAffect == StatToAffect.PrestigeDPCMultiplier){
+                canAfford = playerData.prestigeCurrency >= cost;
+            }
         }
 
         //Gère le slider de progres du palier actuel
@@ -171,7 +177,7 @@ public class ShopItemUI : MonoBehaviour
 
         purchaseButton.interactable = canAfford && prerequisitesMet;
 
-        Debug.Log($"Mise à jour de l'UI pour l'upgrade {currentUpgrade.GetIsShown()}}}");
+        //Debug.Log($"Mise à jour de l'UI pour l'upgrade {currentUpgrade.GetIsShown()}}}");
 
          if (this.GetCurrentUpgrade() is BaseMasteryUpgrade distanceUpgrade)
         {
