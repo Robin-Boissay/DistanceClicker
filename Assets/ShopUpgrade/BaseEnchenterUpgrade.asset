@@ -27,10 +27,19 @@ MonoBehaviour:
     upgradeDefinition: {fileID: 0}
   baseCost:
     mantissa: 1
-    exponent: 2
+    exponent: 1
   growthCostFactor: 1.05
   baseStatGain:
-    mantissa: 5
+    mantissa: 2
     exponent: 0
   statToAffect: 5
-  milestones: []
+  milestones:
+  - milestoneLevel: 10
+    baseCostMultiplier: 1.5
+    statBonusMultiplier: 2
+  - milestoneLevel: 50
+    baseCostMultiplier: 1.5
+    statBonusMultiplier: 2
+  - milestoneLevel: 60
+    baseCostMultiplier: 1.5
+    statBonusMultiplier: 100

@@ -139,6 +139,7 @@ public class ShopItemUI : MonoBehaviour
             else if(currentStatUpgrade.statToAffect == StatToAffect.EnchenteurMultiplier){
                 costText.text = $"{ConvertExpToLevel.GetLevelFromExp(cost).ToString()}Level"; // Formatte le nombre
                 canAfford = playerData.expJoueur >= cost;
+                effectText.text = " Damageee multiplier += " + NumberFormatter.Format(currentStatUpgrade.GetStatBonusForLevel(currentStatUpgrade.GetLevel()));
             }
             else if(currentStatUpgrade.statToAffect == StatToAffect.DPC){
                 effectText.text = " DPC + " + NumberFormatter.Format(currentStatUpgrade.GetStatBonusForLevel(currentStatUpgrade.GetLevel()));

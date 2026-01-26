@@ -19,7 +19,7 @@ MonoBehaviour:
   uiInfo:
     nameText: Mastery Boss
     descriptionText: 
-    effectText: '* x% vie et gain'
+    effectText: 
     gainText: 0
     iconImage: {fileID: 0}
   conditionUnlock:
