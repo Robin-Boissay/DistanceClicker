@@ -188,4 +188,10 @@ public class StatsManager : MonoBehaviour
         // La clé n'a PAS été trouvée, on retourne 0
         return new BigDouble(0);
     }
+
+    public void DoubleMoney()
+    {
+        currentPlayerData.monnaiePrincipale *= 2;
+        OnStatsUpdated?.Invoke();
+    }
 }

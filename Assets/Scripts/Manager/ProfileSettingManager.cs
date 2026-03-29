@@ -12,12 +12,13 @@ public class ProfileSettingManager : MonoBehaviour
     [Header("UI References")]
     public TMP_InputField inputPseudo;
     public TextMeshProUGUI textFeedback;
+    public TextMeshProUGUI DoubleMoneyPriceText;
     public GameObject updatePanel; // Pour pouvoir fermer la fenêtre après succès
     private bool isSettingboardOpen = false; // État actuel du leaderboard
     
     [SerializeField] private Button settingboardButton;    // Référence au bouton qui ouvre/ferme
     [SerializeField] private Animator settingboardAnimator; // Référence à l'Animator du settingPanel
-
+    
     private FirebaseAuth auth;
     private FirebaseFirestore dbReference; // Référence à la base de données
 
@@ -33,6 +34,7 @@ public class ProfileSettingManager : MonoBehaviour
         }
         
         textFeedback.text = "";
+        DoubleMoneyPriceText.text = IAPManager.Instance.GetProductPrice("double_money"); 
     }
 
     // Fonction appelée par le bouton "Valider"

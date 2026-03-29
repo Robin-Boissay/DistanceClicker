@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
     public LeaderboardManager leaderboardManager;
     public ProfileSettingManager profileSettingManager;
     public IdleManager idleManager;
+    public IAPManager iapManager;
 
     void Awake()
     {
@@ -43,6 +44,7 @@ public class GameManager : MonoBehaviour
         await saveManager.Initialize();
 
         // Initialisation des autres managers
+        iapManager.Initialize();
         shopManager.Initialize();
         distanceManager.Initialize();
         uiManager.Initialize();
