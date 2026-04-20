@@ -1200,9 +1200,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tabMappings:
   - category: 0
-    contentPanel: {fileID: 0}
+    contentPanel: {fileID: 92057259}
   - category: 1
-    contentPanel: {fileID: 0}
+    contentPanel: {fileID: 1727273280}
+  - category: 2
+    contentPanel: {fileID: 1216323432}
   shopItemPrefab: {fileID: 3759404868727501060, guid: 00650c845066bc444835e5235def172b, type: 3}
   distanceMonnaieText: {fileID: 213117626}
   dpcText: {fileID: 381206736}
@@ -3072,7 +3074,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 55.15
+  m_fontSize: 50.4
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -5776,7 +5778,7 @@ MonoBehaviour:
   profileSettingManager: {fileID: 636675972}
   idleManager: {fileID: 1601146264}
   iapManager: {fileID: 18791782}
-  prestigeManager: {fileID: 0}
+  prestigeManager: {fileID: 1707516971}
 --- !u!1 &1134246446
 GameObject:
   m_ObjectHideFlags: 0
@@ -6555,7 +6557,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 990264794}
   m_HandleRect: {fileID: 990264793}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -8036,7 +8038,7 @@ MonoBehaviour:
   playerRankText: {fileID: 0}
   playerDistanceText: {fileID: 0}
   totalParticipantsText: {fileID: 0}
-  showDebugLogs: 1
+  showDebugLogs: 0
 --- !u!1 &1678245046
 GameObject:
   m_ObjectHideFlags: 0

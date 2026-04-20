@@ -82,6 +82,7 @@ public class UIManager : MonoBehaviour
             // 4. Trouver le bon panneau de destination
             if (tabMap.TryGetValue(upgradeSO.shopCategory, out Transform targetPanel))
             {
+                Debug.Log("Panneau trouvé pour la catégorie : " + upgradeSO.shopCategory);
                 // 5. Instancier le bouton dans le bon panneau
                 GameObject itemGO = Instantiate(shopItemPrefab, targetPanel);
 
