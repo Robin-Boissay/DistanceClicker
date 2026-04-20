@@ -53,4 +53,6 @@ public abstract class BaseGlobalUpgrade : ScriptableObject
         //Debug.Log("Niveau actuel de l'upgrade dans les données du joueur = " + data.GetUpgradeLevel(upgradeID));
         return conditionUnlock.IsConditionMet(data) && (levelMax == 0 || !(data.GetUpgradeLevel(upgradeID) >= levelMax));
     }
+    
+    public abstract int GetLevel();
 }

@@ -9,16 +9,18 @@ public class ShopManager : MonoBehaviour
     public static ShopManager instance;
 
     [Header("Contrôle du Panel Shop")]
-    [SerializeField] private GameObject shopPanel; // Référence au GameObject ShopPanel
-    [SerializeField] private Button shopButton;    // Référence au bouton qui ouvre/ferme
     [SerializeField] private Animator shopAnimator; // Référence à l'Animator du ShopPanel
     private bool isShopOpen = false; // État actuel du shop
 
     [Header("Références des Onglets")]
     [SerializeField] private GameObject globalTabPanel; // Le Panel de l'onglet "Global"
     [SerializeField] private GameObject masteryTabPanel; // Le Panel de l'onglet "Maîtrise"
+    [SerializeField] private GameObject prestigeTabPanel; // Le Panel de l'onglet "Prestige"
+    
     [SerializeField] private Button globalTabButton;     // Le bouton pour afficher l'onglet "Global"
     [SerializeField] private Button masteryTabButton;    // Le bouton pour afficher l'onglet "Maîtrise"
+    [SerializeField] private Button prestigeTabButton;   // Le bouton pour afficher l'onglet "Prestige"
+    
     // (Optionnel) Ajoute un TextMeshProUGUI ici si tu veux changer le titre "Maîtrise : Atome"
 
     [Header("Références d'Instanciation")]
@@ -26,6 +28,7 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private RectTransform globalUpgradesParent;
     // L'endroit où les items "Maîtrise" seront affichés
     [SerializeField] private RectTransform masteryUpgradesParent; 
+    [SerializeField] private RectTransform prestigeUpgradesParent;
     [SerializeField] private GameObject shopItemPrefab; // Le Prefab du bouton d'upgrade
 
     [Header("Définitions d'Upgrades")]
@@ -37,6 +40,7 @@ public class ShopManager : MonoBehaviour
 
     private List<ShopItemUI> allMasteryShopItems = new List<ShopItemUI>();
 
+    private ShopCategory currentTab = ShopCategory.Global;
 
     public void Initialize()
     {
@@ -51,24 +55,18 @@ public class ShopManager : MonoBehaviour
         }
 
          // Validation des références de base
-        if (shopPanel == null) Debug.LogError("ShopPanel n'est pas assigné.");
-        if (shopButton == null) Debug.LogError("ShopButton n'est pas assigné.");
         if (shopAnimator == null) Debug.LogError("ShopAnimator n'est pas assigné.");
 
         // Validation des nouvelles références d'onglets
         if (globalTabPanel == null) Debug.LogError("GlobalTabPanel n'est pas assigné.");
         if (masteryTabPanel == null) Debug.LogError("MasteryTabPanel n'est pas assigné.");
+        if (prestigeTabPanel == null) Debug.LogError("PrestigeTabPanel n'est pas assigné.");
         if (globalTabButton == null) Debug.LogError("GlobalTabButton n'est pas assigné.");
         if (masteryTabButton == null) Debug.LogError("MasteryTabButton n'est pas assigné.");
+        if (prestigeTabButton == null) Debug.LogError("PrestigeTabButton n'est pas assigné.");
         if (globalUpgradesParent == null) Debug.LogError("GlobalUpgradesParent n'est pas assigné.");
         if (masteryUpgradesParent == null) Debug.LogError("MasteryUpgradesParent n'est pas assigné.");
-
-        // Attachez l'écouteur de clic au bouton principal
-        if (shopButton != null)
-        {
-            shopButton.onClick.AddListener(ToggleShop);
-        }
-
+        if (prestigeUpgradesParent == null) Debug.LogError("PrestigeUpgradesParent n'est pas assigné.");
         // Attachez les écouteurs pour les boutons d'onglets
         if (globalTabButton != null)
         {
@@ -77,6 +75,10 @@ public class ShopManager : MonoBehaviour
         if (masteryTabButton != null)
         {
             masteryTabButton.onClick.AddListener(ShowMasteryTab); // <-- NOUVEAU
+        }
+        if (prestigeTabButton != null)
+        {
+            prestigeTabButton.onClick.AddListener(ShowPrestigeTab); // <-- NOUVEAU
         }
 
         // Initialisation de la boutique
@@ -114,20 +116,79 @@ public class ShopManager : MonoBehaviour
         }
     }
 
-    // --- NAVIGATION DES ONGLETS ---
-
-    public void ShowGlobalTab() // <-- NOUVEAU
+    /// <summary>
+    /// Fonction unique appelée par les boutons publics.
+    /// Elle décide si on ouvre, ferme ou change d'onglet.
+    /// </summary>
+    private void HandleTabClick(ShopCategory tabClicked)
     {
-        globalTabPanel.SetActive(true);
-        masteryTabPanel.SetActive(false);
-        // Ici, tu pourrais aussi changer les couleurs des boutons d'onglets
+        // CAS 1 : Le Shop est fermé.
+        // ACTION : On prépare l'onglet demandé et on ouvre.
+        if (!isShopOpen)
+        {
+            UpdateTabVisuals(tabClicked);
+            ToggleShop();
+            return;
+        }
+
+        // CAS 2 : Le Shop est ouvert ET on clique sur l'onglet DÉJÀ actif.
+        // ACTION : On ferme le shop (Toggle).
+        if (isShopOpen && currentTab == tabClicked)
+        {
+            UpdateTabVisuals(tabClicked, true); // Remettre le bouton en blanc avant de fermer
+            ToggleShop();
+            //Remettre en blanc le bouton
+            
+            return;
+        }
+
+        // CAS 3 : Le Shop est ouvert, mais on clique sur un AUTRE onglet.
+        // ACTION : On change simplement le visuel.
+        UpdateTabVisuals(tabClicked);
+    }
+    /// <summary>
+    /// Gère l'activation/désactivation des objets et les couleurs.
+    /// </summary>
+    private void UpdateTabVisuals(ShopCategory tabToActivate, bool isClosing = false)
+    {
+        currentTab = tabToActivate; // On mémorise le nouvel onglet actif
+
+        // 1. Activer le bon Panel, désactiver les autres
+        globalTabPanel.SetActive(tabToActivate == ShopCategory.Global);
+        masteryTabPanel.SetActive(tabToActivate == ShopCategory.Mastery);
+        prestigeTabPanel.SetActive(tabToActivate == ShopCategory.Prestige);
+
+        // 2. Mettre à jour les couleurs (Gris = Actif, Blanc = Inactif), si isClosing est vrai alors tout mettre à blanc
+        if (isClosing)
+        {
+            globalTabButton.GetComponent<Image>().color = Color.white;
+            masteryTabButton.GetComponent<Image>().color = Color.white;
+            prestigeTabButton.GetComponent<Image>().color = Color.white;
+            return;
+        }
+        globalTabButton.GetComponent<Image>().color = (tabToActivate == ShopCategory.Global) ? Color.gray : Color.white;
+        masteryTabButton.GetComponent<Image>().color = (tabToActivate == ShopCategory.Mastery) ? Color.gray : Color.white;
+        prestigeTabButton.GetComponent<Image>().color = (tabToActivate == ShopCategory.Prestige) ? Color.gray : Color.white;
+        
     }
 
-    public void ShowMasteryTab() // <-- NOUVEAU
+   
+    public void ShowGlobalTab()
     {
-        globalTabPanel.SetActive(false);
-        masteryTabPanel.SetActive(true);
-        // Ici, tu pourrais aussi changer les couleurs des boutons d'onglets
+        HandleTabClick(ShopCategory.Global);
+    }
+
+    public void ShowMasteryTab()
+    {
+        HandleTabClick(ShopCategory.Mastery);
+    }
+
+    public void ShowPrestigeTab()
+    {
+        Debug.Log("ShopManager: Clic sur l'onglet Prestige.");
+        HandleTabClick(ShopCategory.Prestige);
+        PrestigeManager.Instance.UpdatePrestigeUI();
+
     }
 
     // --- LOGIQUE DU SHOP (ACHAT ET AFFICHAGE) ---

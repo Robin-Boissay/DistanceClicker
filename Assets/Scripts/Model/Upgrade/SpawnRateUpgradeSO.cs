@@ -43,13 +43,6 @@ public class SpawnRateUpgradeSO : StatsUpgrade
         int currentLevel = GetLevel();
         return - (currentLevel * baseStatGain);
     }
-
-    public int GetLevel()
-    {
-        PlayerData data = StatsManager.Instance.currentPlayerData;
-        int currentLevel = data.GetUpgradeLevel(this.upgradeID);
-        return currentLevel;
-    }
     
     public override bool IsRequirementsMet()
     {   

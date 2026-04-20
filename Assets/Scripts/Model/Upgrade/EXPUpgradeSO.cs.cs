@@ -42,12 +42,6 @@ public class EXPUpgradeSO : StatsUpgrade
         return currentLevel * baseStatGain;
     }
 
-    public int GetLevel()
-    {
-        PlayerData data = StatsManager.Instance.currentPlayerData;
-        int currentLevel = data.GetUpgradeLevel(this.upgradeID);
-        return currentLevel;
-    }
     
     public override bool IsRequirementsMet()
     {   

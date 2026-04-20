@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour
     public ProfileSettingManager profileSettingManager;
     public IdleManager idleManager;
     public IAPManager iapManager;
+    public PrestigeManager prestigeManager;
 
     void Awake()
     {

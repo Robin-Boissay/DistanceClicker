@@ -6,7 +6,9 @@ using BreakInfinity;
 /// </summary>
 public abstract class BaseMilestone : ScriptableObject
 {
+    public int milestoneLevel;
 
-    
+    public float baseCostMultiplier;
 
+    public float statBonusMultiplier;
 }

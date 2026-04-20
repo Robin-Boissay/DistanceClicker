@@ -111,6 +111,19 @@ public class StatsManager : MonoBehaviour
     {
         return upgradeMap;
     }
+    //GetUpgradeByID
+    public BaseGlobalUpgrade GetUpgradeByID(string upgradeID)
+    {
+        if (upgradeMap.TryGetValue(upgradeID, out BaseGlobalUpgrade upgradeSO))
+        {
+            return upgradeSO;
+        }
+        else
+        {
+            Debug.LogError($"Upgrade ID '{upgradeID}' non trouvé dans la base de données.");
+            return null;
+        }
+    }
 
     /// <summary>
     /// Recalcule TOUTES les stats en scannant les upgrades du joueur.
