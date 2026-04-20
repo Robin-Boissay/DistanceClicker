@@ -564,7 +564,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 45.8
+  m_fontSize: 46.05
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -3074,7 +3074,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 55.15
+  m_fontSize: 54.85
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -4628,7 +4628,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 46.75
+  m_fontSize: 47
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -5633,6 +5633,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: cdfe6e46ee9548f4e8dfbce51df29d42, type: 2}
   - {fileID: 11400000, guid: a324fd1c00e35114f938033da9d0ae83, type: 2}
   - {fileID: 11400000, guid: 34cd04f992f928b49bbba38ae8c4812f, type: 2}
+  - {fileID: 11400000, guid: c8fe8d9470823074a8e845d79762d02d, type: 2}
 --- !u!1 &1117623117
 GameObject:
   m_ObjectHideFlags: 0
@@ -6557,7 +6558,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 990264794}
   m_HandleRect: {fileID: 990264793}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -7249,7 +7250,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1590346862}
   m_HandleRect: {fileID: 1590346861}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -7345,10 +7346,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93d9397cc7aa4df43a105072c7ab8f85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LeaderboardUI
-  leaderboardText: {fileID: 0}
+  leaderboardText: {fileID: 964373500}
   rowPrefab: {fileID: 3759404868727501060, guid: 937a43ea0ab231449a7c694479a398db, type: 3}
   tableContent: {fileID: 0}
-  loadingText: {fileID: 0}
+  loadingText: {fileID: 1711235931}
 --- !u!114 &1500020513
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8122,7 +8123,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1707516971}
         m_TargetAssemblyTypeName: PrestigeManager, Assembly-CSharp
         m_MethodName: DoPrestige
         m_Mode: 1
@@ -8752,7 +8753,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 54.85
+  m_fontSize: 54.55
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
