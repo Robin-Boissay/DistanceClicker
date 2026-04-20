@@ -57,6 +57,15 @@ public class ProfileSettingManager : MonoBehaviour
             return;
         }
 
+        // [SÉCURITÉ] 1.5 Validation des caractères (Sanitization / Prévention Injection)
+        // N'autorise que les lettres (avec ou sans accents), chiffres, tirets et underscores
+        if (!System.Text.RegularExpressions.Regex.IsMatch(newPseudo, @"^[\p{L}\p{N}_\-]+$"))
+        {
+            textFeedback.text = "Caractères non valides utilisés.";
+            textFeedback.color = Color.red;
+            return;
+        }
+
         // 2. Lancer la mise à jour
         await UpdateUsernameRoutine(newPseudo);
     }

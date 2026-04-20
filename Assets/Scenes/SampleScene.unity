@@ -2671,6 +2671,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProfileManager
   inputPseudo: {fileID: 591922231}
   textFeedback: {fileID: 731097246}
+  DoubleMoneyPriceText: {fileID: 1786683262}
   updatePanel: {fileID: 1013800784}
   settingboardButton: {fileID: 2092051508}
   settingboardAnimator: {fileID: 1013800788}
@@ -4434,6 +4435,7 @@ MonoBehaviour:
   leaderboardManager: {fileID: 1777938921}
   profileSettingManager: {fileID: 636675972}
   idleManager: {fileID: 1601146264}
+  iapManager: {fileID: 18791782}
 --- !u!1 &1134246446
 GameObject:
   m_ObjectHideFlags: 0

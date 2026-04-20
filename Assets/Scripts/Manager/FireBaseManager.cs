@@ -38,32 +38,35 @@ public class FirebaseManager : MonoBehaviour
         else
         {
             Destroy(gameObject);
+            return;
         }
 
-        //Debug.Log("FirebaseManager: Initialisation en cours...");
-
-        await FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(async task =>
+        // On await directement la tâche au lieu d'utiliser ContinueWithOnMainThread
+        // qui créait une Race Condition (Initialisation terminée avant la fin de la tâche async interne)
+        var dependencyStatus = await FirebaseApp.CheckAndFixDependenciesAsync();
+        
+        if (dependencyStatus == DependencyStatus.Available)
         {
-            var dependencyStatus = task.Result;
-            if (dependencyStatus == DependencyStatus.Available)
-            {
-                // Les dépendances sont prêtes.
-                _app = FirebaseApp.DefaultInstance;
+            // Les dépendances sont prêtes.
+            this._app = FirebaseApp.DefaultInstance;
 
-                // Initialise les services
-                db = FirebaseFirestore.DefaultInstance;
-                auth = FirebaseAuth.DefaultInstance; // NOUVEAU
+            // --- DEBUG : Afficher tous les logs internes de Firebase ---
+            Firebase.FirebaseApp.LogLevel = Firebase.LogLevel.Debug; 
 
-                Debug.Log("Firebase Core et Firestore sont prêts.");
+            // Initialise les services
+            this.db = FirebaseFirestore.DefaultInstance;
+            this.auth = FirebaseAuth.DefaultInstance; 
 
-                // On lance la connexion anonyme
-                await SignInAnonymouslyAsync(); 
-            }
-            else
-            {
-                Debug.LogError($"Impossible de résoudre les dépendances Firebase : {dependencyStatus}");
-            }
-        });
+            Debug.Log("Firebase Core et Firestore sont prêts.");
+
+            // On lance la connexion anonyme et ON L'AWAIT proprement
+            await SignInAnonymouslyAsync(); 
+        }
+        else
+        {
+            Debug.LogError($"Impossible de résoudre les dépendances Firebase : {dependencyStatus}");
+            // [SÉCURITÉ] Alerter l'UI ou bloquer le jeu plutôt que de continuer silencieusement
+        }
     }
 
     /// <summary>
@@ -104,10 +107,33 @@ public class FirebaseManager : MonoBehaviour
         
         // C'est seulement MAINTENANT que Firebase est VRAIMENT prêt
         isFirebaseReady = (user != null);
-        
-        if(isFirebaseReady)
+    }
+
+    /// <summary>
+    /// [SÉCURITÉ] Transforme un compte anonyme en compte persistant (OWASP A07)
+    /// Évite la perte définitive du compte si le joueur vide le cache ou change d'appareil.
+    /// </summary>
+    public async Task LinkAnonymousAccountToEmail(string email, string password)
+    {
+        if (user == null || !user.IsAnonymous)
         {
-            // On peut lancer le test d'écriture (maintenant il est authentifié)
+            Debug.LogWarning("Le joueur n'est pas anonyme ou n'est pas connecté.");
+            return;
+        }
+
+        try
+        {
+            Credential credential = EmailAuthProvider.GetCredential(email, password);
+            
+            // Tente de lier les identifiants au compte anonyme actuel
+            var result = await user.LinkWithCredentialAsync(credential);
+            
+            Debug.Log($"Compte anonyme lié avec succès à l'email : {result.User.Email}");
+            // Le joueur a maintenant un compte sécurisé et persistant, gardant ses données DistanceClicker
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Échec de la liaison de compte : {e.Message}");
         }
     }
 }

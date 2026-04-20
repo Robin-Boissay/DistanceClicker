@@ -134,17 +134,24 @@ public class SaveManager : MonoBehaviour
         }
     }
 
+    [ContextMenu("Test Save To Firestore")]
+    public void TestSaveToFirestore()
+    {
+        // Permet de tester manuellement la sauvegarde depuis l'éditeur sans quitter le jeu
+        _ = SaveGameToFirestore();
+    }
+
     /// <summary>
     /// Sauvegarde la progression actuelle du joueur dans Cloud Firestore.
     /// </summary>
-    public async Task SaveGameToFirestore()
+    public Task SaveGameToFirestore()
     {
         // 1. Récupérer le joueur (tu l'as déjà)
         PlayerData playerDataToSave = StatsManager.Instance.currentPlayerData;
         if (playerDataToSave == null)
         {
             Debug.LogError("Impossible de sauvegarder : PlayerData est null.");
-            return;
+            return Task.CompletedTask;
         }
 
         // 2. Récupérer le FirebaseManager (pour l'ID et la connexion)
@@ -152,29 +159,40 @@ public class SaveManager : MonoBehaviour
         if (!firebase.isFirebaseReady || firebase.user == null)
         {
             Debug.LogWarning("Sauvegarde annulée : Firebase n'est pas prêt.");
-            // Note : les données restent dans le cache hors-ligne de Firestore
-            // si elles ont été écrites avant, donc ce n'est pas critique.
-            return;
+            return Task.CompletedTask;
         }
 
         try
         {
             Debug.Log($"Sauvegarde Firestore en cours pour {firebase.user.UserId}...");
 
-            // 3. Convertir les données en format Firestore
+            // 3. Convertir les données en format Firestore (qui gère désormais le chiffrement E2EE en interne)
             Dictionary<string, object> data = playerDataToSave.ToFirestoreData();
 
             // 4. Définir la cible : /users/{UserID}
             DocumentReference docRef = firebase.db.Collection("users").Document(firebase.user.UserId);
 
             // 5. Envoyer les données (en mode Merge pour ne rien écraser)
-            await docRef.SetAsync(data, SetOptions.MergeAll);
-            
-            Debug.Log("Sauvegarde Firestore réussie !");
+            return docRef.SetAsync(data, SetOptions.MergeAll).ContinueWithOnMainThread(task =>
+            {
+                if (task.IsCanceled)
+                {
+                    Debug.LogError("Sauvegarde Firestore annulée.");
+                }
+                else if (task.IsFaulted)
+                {
+                    Debug.LogError($"ERREUR: Échec de la sauvegarde Firestore. {task.Exception}");
+                }
+                else
+                {
+                    Debug.Log("Sauvegarde Firestore réussie !");
+                }
+            });
         }
         catch (System.Exception e)
         {
-            Debug.LogError($"ERREUR : Échec de la sauvegarde Firestore. Erreur : {e.Message}");
+            Debug.LogError($"ERREUR : Préparation de la sauvegarde Firestore. {e.Message}");
+            return Task.CompletedTask;
         }
     }
 
@@ -205,7 +223,10 @@ public class SaveManager : MonoBehaviour
             Debug.Log($"Recherche des données pour le joueur : {firebase.user.UserId}...");
             
             //  --- LA CORRECTION EST ICI ---
-            DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
+            DocumentSnapshot snapshot = await docRef.GetSnapshotAsync().ContinueWithOnMainThread(task => {
+                if (task.IsFaulted || task.IsCanceled) throw task.Exception ?? new Exception("Firebase Task failed");
+                return task.Result;
+            });
             //  -----------------------------
 
             // 4. Vérifier si le document existe
@@ -213,12 +234,11 @@ public class SaveManager : MonoBehaviour
             {
                 // ----- CAS 1: JOUEUR EXISTANT -----
                 Debug.Log("Données trouvées ! Chargement de la progression.");
-                
-                PlayerData loadedData = new PlayerData(needCreateUsername: false);
                 Dictionary<string, object> data = snapshot.ToDictionary();
+
+                PlayerData loadedData = new PlayerData(needCreateUsername: false);
                 
-                // Cette ligne causait la première erreur
-                // (assure-toi que PlayerData.cs est sauvegardé et compile)
+                // PlayerData va désormais s'occuper de récupérer ses données chiffrées ou non
                 loadedData.LoadFromFirestoreData(data);
                 
                 return loadedData;
@@ -232,9 +252,27 @@ public class SaveManager : MonoBehaviour
         }
         catch (Exception e)
         {
+            LogSecurityEvent("CRITICAL_SECURITY", $"Firestore Load Failed: {e.Message}");
             Debug.LogError($"ERREUR : Échec critique du chargement. {e.Message}");
             return new PlayerData();
         }
+    }
+
+    public static void LogSecurityEvent(string severity, string message)
+    {
+        FirebaseManager fb = FirebaseManager.Instance;
+        if (fb == null || fb.user == null) return;
+        
+        Dictionary<string, object> logData = new Dictionary<string, object>
+        {
+            { "uid", fb.user.UserId },
+            { "severity", severity }, // ex: "CRITICAL_SECURITY"
+            { "message", message },
+            { "timestamp", FieldValue.ServerTimestamp }
+        };
+        
+        // Envoi silencieux sans bloquer le jeu
+        fb.db.Collection("security_logs").AddAsync(logData);
     }
 
     /// <summary>

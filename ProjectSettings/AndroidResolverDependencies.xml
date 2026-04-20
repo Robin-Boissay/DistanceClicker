@@ -2,7 +2,11 @@
   <packages>
     <package>com.google.android.gms:play-services-base:18.9.0</package>
     <package>com.google.firebase:firebase-analytics:23.0.0</package>
-    <package>com.google.firebase:firebase-app-unity:13.6.0</package>
+    <package>com.google.firebase:firebase-appcheck:19.0.1</package>
+    <package>com.google.firebase:firebase-appcheck-debug:19.0.1</package>
+    <package>com.google.firebase:firebase-appcheck-playintegrity:19.0.1</package>
+    <package>com.google.firebase:firebase-appcheck-unity:13.5.0</package>
+    <package>com.google.firebase:firebase-app-unity:13.5.0</package>
     <package>com.google.firebase:firebase-auth:24.0.1</package>
     <package>com.google.firebase:firebase-auth-unity:13.6.0</package>
     <package>com.google.firebase:firebase-common:22.0.1</package>
@@ -10,6 +14,10 @@
     <package>com.google.firebase:firebase-firestore-unity:13.6.0</package>
   </packages>
   <files>
+    <file>Assets/GeneratedLocalRepo/Firebase/m2repository/com/google/firebase/firebase-appcheck-unity/13.5.0/firebase-appcheck-unity-13.5.0.aar</file>
+    <file>Assets/GeneratedLocalRepo/Firebase/m2repository/com/google/firebase/firebase-appcheck-unity/13.5.0/firebase-appcheck-unity-13.5.0.pom</file>
+    <file>Assets/GeneratedLocalRepo/Firebase/m2repository/com/google/firebase/firebase-app-unity/13.5.0/firebase-app-unity-13.5.0.aar</file>
+    <file>Assets/GeneratedLocalRepo/Firebase/m2repository/com/google/firebase/firebase-app-unity/13.5.0/firebase-app-unity-13.5.0.pom</file>
     <file>Assets/GeneratedLocalRepo/Firebase/m2repository/com/google/firebase/firebase-app-unity/13.6.0/firebase-app-unity-13.6.0.aar</file>
     <file>Assets/GeneratedLocalRepo/Firebase/m2repository/com/google/firebase/firebase-app-unity/13.6.0/firebase-app-unity-13.6.0.pom</file>
     <file>Assets/GeneratedLocalRepo/Firebase/m2repository/com/google/firebase/firebase-auth-unity/13.6.0/firebase-auth-unity-13.6.0.aar</file>

@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Règles pour la collection "users"
+    match /users/{userId} {
+      // Un utilisateur peut lire ses propres données
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      // Pour l'écriture, il doit être le propriétaire ET les données doivent être valides (Anti-Injection)
+      allow write: if request.auth != null 
+                   && request.auth.uid == userId
+                   && (
+                     // Soit il n'envoie pas de pseudo
+                     !("username" in request.resource.data) 
+                     || 
+                     // Soit le pseudo est une chaîne valide, non vide, max 30 caractères, sans caractères spéciaux dangereux
+                     (request.resource.data.username is string 
+                      && request.resource.data.username.size() > 0 
+                      && request.resource.data.username.size() <= 30
+                      && request.resource.data.username.matches('^[a-zA-Z0-9_-]+$'))
+                   );
+    }
+  }
+}

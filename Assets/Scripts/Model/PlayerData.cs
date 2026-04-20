@@ -5,7 +5,7 @@ using System;
 using Firebase.Firestore;
 
 [System.Serializable]
-public class PlayerData
+public class PlayerData : ISerializationCallbackReceiver
 {
     private int identifiantJoueur;
     public string username;
@@ -13,9 +13,38 @@ public class PlayerData
     public BigDouble monnaiePrincipale;
     public BigDouble expJoueur;
     private Dictionary<string, int> upgradeLevels = new Dictionary<string, int>();
+
+    // Variables nécessaires pour que JsonUtility (sauvegarde locale) puisse sauvegarder le dictionnaire
+    [SerializeField, HideInInspector] private List<string> _upgradeKeys = new List<string>();
+    [SerializeField, HideInInspector] private List<int> _upgradeValues = new List<int>();
     
     // L'événement qui préviendra le StatsManager
     public static event Action OnDataChanged;
+
+    public void OnBeforeSerialize()
+    {
+        _upgradeKeys.Clear();
+        _upgradeValues.Clear();
+        if (upgradeLevels != null)
+        {
+            foreach (var kvp in upgradeLevels)
+            {
+                _upgradeKeys.Add(kvp.Key);
+                _upgradeValues.Add(kvp.Value);
+            }
+        }
+    }
+
+    public void OnAfterDeserialize()
+    {
+        // Au chargement local, on reconstruit le dictionnaire depuis les listes
+        upgradeLevels = new Dictionary<string, int>();
+        int count = Math.Min(_upgradeKeys.Count, _upgradeValues.Count);
+        for (int i = 0; i < count; i++)
+        {
+            upgradeLevels[_upgradeKeys[i]] = _upgradeValues[i];
+        }
+    }
 
     // --- Constructeur ---
     public PlayerData(bool needCreateUsername = true)
@@ -123,39 +152,64 @@ public class PlayerData
     /// <returns>Un Dictionnaire formaté pour Firestore.</returns>
     public Dictionary<string, object> ToFirestoreData()
     {
-        // 1. Gérer la monnaie (BigDouble)
-        // Firestore ne sait pas ce qu'est un BigDouble,
-        // mais il sait ce qu'est une "Map" (Dictionnaire).
-        Dictionary<string, object> monnaieData = new Dictionary<string, object>
+        // Sécurité : Vérifier que le pseudo est conforme aux règles Firestore (Anti-Injection et regex)
+        if (string.IsNullOrEmpty(this.username))
         {
-            { "mantissa", monnaiePrincipale.GetMantissa() },
-            { "exponent", monnaiePrincipale.GetExponent() }
-        };
-
-        Dictionary<string, object> experienceData = new Dictionary<string, object>
+            this.username = NameGenerator.GenerateRandomName();
+        }
+        else
         {
-            { "mantissa", expJoueur.GetMantissa() },
-            { "exponent", expJoueur.GetExponent() }
-        };
+            // Nettoyer le nom d'utilisateur de tous les caractères non autorisés par la règle Firestore
+            this.username = System.Text.RegularExpressions.Regex.Replace(this.username, @"[^a-zA-Z0-9_-]", "");
+            if (this.username.Length == 0)
+            {
+                this.username = NameGenerator.GenerateRandomName();
+            }
+            if (this.username.Length > 30)
+            {
+                this.username = this.username.Substring(0, 30);
+            }
+        }
 
-        // 2. Gérer les métadonnées
+        // --- E2EE CHIFFREMENT ---
+        // 1. Chiffrer la Monnaie Principale (mantissa, exponent)
+        string strMonnaie = monnaiePrincipale.GetMantissa() + ":" + monnaiePrincipale.GetExponent();
+        string encMonnaie = EncryptionUtility.Encrypt(strMonnaie);
+
+        // 2. Chiffrer l'Expérience Joueur
+        string strExp = expJoueur.GetMantissa() + ":" + expJoueur.GetExponent();
+        string encExp = EncryptionUtility.Encrypt(strExp);
+
+        // 3. Chiffrer les Upgrades (format: key1=value1;key2=value2;)
+        string strUpgrades = "";
+        if (upgradeLevels != null)
+        {
+            foreach(var kvp in upgradeLevels)
+            {
+                strUpgrades += kvp.Key + "=" + kvp.Value + ";";
+            }
+        }
+        string encUpgrades = EncryptionUtility.Encrypt(strUpgrades);
+
+        // Métadonnées
         Dictionary<string, object> metadata = new Dictionary<string, object>
         {
             { "derniereSauvegarde", FieldValue.ServerTimestamp }
-            // Tu peux aussi ajouter "derniereConnexion" ici
         };
 
+        // --- INTÉGRITÉ (OWASP A08) ---
+        string payloadToSign = encMonnaie + encExp + encUpgrades;
+        string generatedSignature = EncryptionUtility.GenerateHMAC(payloadToSign);
 
-        // 3. Créer l'objet principal à envoyer
+        // Créer l'objet principal à envoyer avec les champs chiffrés et la signature HMAC
         Dictionary<string, object> data = new Dictionary<string, object>
         {
-            { "monnaiePrincipale", monnaieData },
-            { "expJoueur", experienceData },
+            { "monnaieEncrypted", encMonnaie },
+            { "expEncrypted", encExp },
+            { "upgradesEncrypted", encUpgrades },
+            { "dataSignature", generatedSignature },
             { "metadata", metadata },
-            { "username", username },
-            // C'est là que c'est magique :
-            // Pas besoin de listes ! On envoie le Dictionnaire directement.
-            { "upgrades", upgradeLevels } 
+            { "username", username }
         };
 
         return data;
@@ -168,50 +222,101 @@ public class PlayerData
     /// <param name="data">Le dictionnaire lu depuis Firestore.</param>
     public void LoadFromFirestoreData(Dictionary<string, object> data)
     {
-        // 1. Parse la monnaie
-        if (data.TryGetValue("monnaiePrincipale", out object monnaieObj))
+        // --- VÉRIFICATION D'INTÉGRITÉ (OWASP A08) ---
+        bool isDataTampered = false;
+        if (data.TryGetValue("monnaieEncrypted", out object mObj) &&
+            data.TryGetValue("expEncrypted", out object eObj) &&
+            data.TryGetValue("upgradesEncrypted", out object uObj))
         {
-            // Firestore renvoie les "Maps" comme des Dictionnaires <string, object>
-            Dictionary<string, object> monnaieMap = monnaieObj as Dictionary<string, object>;
-            if (monnaieMap != null && monnaieMap.ContainsKey("mantissa") && monnaieMap.ContainsKey("exponent"))
+            string expectedSignature = EncryptionUtility.GenerateHMAC((string)mObj + (string)eObj + (string)uObj);
+            if (!data.TryGetValue("dataSignature", out object serverSignature) || serverSignature.ToString() != expectedSignature)
             {
-                // On utilise Convert.ToDouble pour être sûr (Firestore peut utiliser différents types)
-                double mantissa = Convert.ToDouble(monnaieMap["mantissa"]);
-                // Firestore renvoie les nombres entiers en Int64 (long) par défaut
-                long exponent = Convert.ToInt64(monnaieMap["exponent"]);
-                
-                this.monnaiePrincipale = new BigDouble(mantissa, (int)exponent);
+                Debug.LogError("[ALERTE SÉCURITÉ] Échec de l'intégrité (OWASP A08) : Signature invalide ! La sauvegarde a été falsifiée.");
+                isDataTampered = true;
             }
         }
 
-        // 1. Parse l'expérience
-        if (data.TryGetValue("expJoueur", out object experienceObj))
+        // Si les données ont été altérées, on bloque la désérialisation pour empêcher l'exploit
+        if (isDataTampered)
+        {
+            return;
+        }
+
+        // --- E2EE DÉCHIFFREMENT ---
+
+        // 1. Parse la monnaie (Nouveau format chiffré)
+        if (data.TryGetValue("monnaieEncrypted", out object monnaieEncObj))
+        {
+            try
+            {
+                string dec = EncryptionUtility.Decrypt(monnaieEncObj as string);
+                var parts = dec.Split(':');
+                if (parts.Length == 2)
+                    this.monnaiePrincipale = new BigDouble(double.Parse(parts[0]), int.Parse(parts[1]));
+            }
+            catch (Exception) { Debug.LogError("Déchiffrement de monnaie a échoué."); }
+        }
+        else if (data.TryGetValue("monnaiePrincipale", out object monnaieObj)) // Rétrocompatibilité (Ancien format clair)
+        {
+            Dictionary<string, object> monnaieMap = monnaieObj as Dictionary<string, object>;
+            if (monnaieMap != null && monnaieMap.ContainsKey("mantissa") && monnaieMap.ContainsKey("exponent"))
+            {
+                this.monnaiePrincipale = new BigDouble(Convert.ToDouble(monnaieMap["mantissa"]), (int)Convert.ToInt64(monnaieMap["exponent"]));
+            }
+        }
+
+        // 2. Parse l'expérience (Nouveau format chiffré)
+        if (data.TryGetValue("expEncrypted", out object expEncObj))
+        {
+            try
+            {
+                string dec = EncryptionUtility.Decrypt(expEncObj as string);
+                var parts = dec.Split(':');
+                if (parts.Length == 2)
+                    this.expJoueur = new BigDouble(double.Parse(parts[0]), int.Parse(parts[1]));
+            }
+            catch (Exception) { Debug.LogError("Déchiffrement exp a échoué."); }
+        }
+        else if (data.TryGetValue("expJoueur", out object experienceObj)) // Rétrocompatibilité (Ancien format clair)
         {
             Dictionary<string, object> experienceMap = experienceObj as Dictionary<string, object>;
             if (experienceMap != null && experienceMap.ContainsKey("mantissa") && experienceMap.ContainsKey("exponent"))
             {
-                double mantissa = Convert.ToDouble(experienceMap["mantissa"]);
-                long exponent = Convert.ToInt64(experienceMap["exponent"]);
-
-                this.expJoueur = new BigDouble(mantissa, (int)exponent);
+                this.expJoueur = new BigDouble(Convert.ToDouble(experienceMap["mantissa"]), (int)Convert.ToInt64(experienceMap["exponent"]));
             }
         }
 
-        // 2. Parse les upgrades
-        // 'upgradeLevels' est déjà initialisé dans le constructeur,
-        // mais on va le vider au cas où.
-        if (data.TryGetValue("upgrades", out object upgradesObj))
+        // 3. Parse les upgrades (Nouveau format chiffré)
+        EnsureUpgradeDict();
+        this.upgradeLevels.Clear(); // Vider les valeurs par défaut
+
+        if (data.TryGetValue("upgradesEncrypted", out object upgradesEncObj))
         {
-            // Firestore renvoie aussi les Dictionnaires <string, int> comme <string, object>
-            // et les 'int' comme des 'long' (Int64)
+            try
+            {
+                string dec = EncryptionUtility.Decrypt(upgradesEncObj as string);
+                if (!string.IsNullOrEmpty(dec))
+                {
+                    string[] pairs = dec.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (string pair in pairs)
+                    {
+                        string[] kv = pair.Split('=');
+                        if (kv.Length == 2)
+                        {
+                            this.upgradeLevels.Add(kv[0], int.Parse(kv[1]));
+                        }
+                    }
+                }
+            }
+            catch (Exception) { Debug.LogError("Déchiffrement des upgrades a échoué."); }
+        }
+        else if (data.TryGetValue("upgrades", out object upgradesObj)) // Rétrocompatibilité (Ancien format clair)
+        {
             Dictionary<string, object> upgradesMap = upgradesObj as Dictionary<string, object>;
             if (upgradesMap != null)
             {
-                EnsureUpgradeDict();
-                this.upgradeLevels.Clear(); // Vider les valeurs par défaut
                 foreach (KeyValuePair<string, object> pair in upgradesMap)
                 {
-                    // On reconvertit le 'long' (Int64) de Firestore en 'int'
                     this.upgradeLevels.Add(pair.Key, Convert.ToInt32(pair.Value));
                 }
             }
