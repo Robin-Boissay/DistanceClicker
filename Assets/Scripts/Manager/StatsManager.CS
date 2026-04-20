@@ -11,7 +11,9 @@ public enum StatToAffect
     SpawnRateCircle,
     MinRewardsMultiplierCircle,
     MaxRewardsMultiplierCircle,
-    EnchenteurMultiplier
+    EnchenteurMultiplier,
+    PrestigeDPCMultiplier,
+    PrestigeDPSMultiplier
 }
 
 public class StatsManager : MonoBehaviour

@@ -56,6 +56,18 @@ public abstract class StatsUpgrade : BaseGlobalUpgrade
         }
 
     }
+    public BigDouble GetStatBonusForLevel(int level)
+    {
+        float totalStatsGainMultiplier = 1f;
+        foreach (BaseMilestone milestone in milestones)
+        {
+            if (GetLevel() >= milestone.milestoneLevel)
+            {
+                totalStatsGainMultiplier *= milestone.statBonusMultiplier;
+            }
+        }
+        return baseStatGain * totalStatsGainMultiplier;
+    }
 
     public bool HasMilestones()
     {
