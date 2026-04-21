@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66ed0aa1020b2c947b7e63a99d076292, type: 3}
   m_Name: NewPrestigeUpgrade
   m_EditorClassIdentifier: Assembly-CSharp::PrestigeUpgradeSO
-  upgradeID: 
+  upgradeID: Prestige_dpc_1
   infoAffichage: Description de l'upgrade...
   shopCategory: 2
   levelMax: 0

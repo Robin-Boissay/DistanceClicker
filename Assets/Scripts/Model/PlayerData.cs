@@ -177,9 +177,25 @@ public class PlayerData
             { "prestigeCurrency", prestigeCurrencyData },
             { "totalPrestigeCurrencyEarned", totalPrestigeCurrencyEarnedData },
             { "prestigeCount", prestigeCount }
-            // Tu peux aussi ajouter "derniereConnexion" ici
         };
 
+
+        // Convertir upgradeLevels en Dictionary<string, object> car Firestore 
+        // Unity SDK lève une exception sur Dictionary<string, int> !
+        Dictionary<string, object> upgradesData = new Dictionary<string, object>();
+        EnsureUpgradeDict();
+        foreach (var kvp in upgradeLevels)
+        {
+            // Firestore interdit qu'une clé de dictionnaire soit vide ou nulle.
+            if (!string.IsNullOrEmpty(kvp.Key))
+            {
+                upgradesData.Add(kvp.Key, kvp.Value);
+            }
+            else
+            {
+                Debug.LogWarning("Une amélioration possède un ID vide ! Vérifiez vos ScriptableObjects.");
+            }
+        }
 
         // 3. Créer l'objet principal à envoyer
         Dictionary<string, object> data = new Dictionary<string, object>
@@ -187,11 +203,9 @@ public class PlayerData
             { "monnaiePrincipale", monnaieData },
             { "expJoueur", experienceData },
             { "metadata", metadata },
-            { "username", username },
+            { "username", username ?? "Player" }, // Sécurise la nullité
             { "prestigeData", prestigeData },
-            // C'est là que c'est magique :
-            // Pas besoin de listes ! On envoie le Dictionnaire directement.
-            { "upgrades", upgradeLevels } 
+            { "upgrades", upgradesData } 
         };
 
         return data;

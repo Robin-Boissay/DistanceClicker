@@ -83,7 +83,6 @@ public class ShopManager : MonoBehaviour
 
         // Initialisation de la boutique
         InstantiateShopItems();
-        ShowGlobalTab(); // Affiche l'onglet global par défaut
     }
 
     private void OnEnable()

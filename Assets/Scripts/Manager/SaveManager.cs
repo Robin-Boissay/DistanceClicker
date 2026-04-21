@@ -139,6 +139,13 @@ public class SaveManager : MonoBehaviour
     /// </summary>
     public async Task SaveGameToFirestore()
     {
+        // 0. Protection contre la fermeture si StatsManager est déjà détruit
+        if (StatsManager.Instance == null)
+        {
+            Debug.LogWarning("Sauvegarde ignorée : StatsManager est déjà détruit. (Fermeture du jeu)");
+            return;
+        }
+
         // 1. Récupérer le joueur (tu l'as déjà)
         PlayerData playerDataToSave = StatsManager.Instance.currentPlayerData;
         if (playerDataToSave == null)
@@ -244,7 +251,9 @@ public class SaveManager : MonoBehaviour
     private void OnApplicationQuit()
     {
         Debug.Log("Fermeture de l'application... Sauvegarde en cours.");
-        SaveGameToFirestore(); // Attendre la fin de la sauvegarde asynchrone
+        // Le " _ = " sert à dire "Je sais que c'est une Task asynchrone, 
+        // ne me donne pas d'avertissement CS4014".
+        _ = SaveGameToFirestore(); 
     }
 
     /// <summary>
@@ -256,8 +265,7 @@ public class SaveManager : MonoBehaviour
         if (pauseStatus)
         {
             // L'application est en train de passer en arrière-plan.
-            // C'est le moment le plus fiable pour sauvegarder sur mobile.
-            SaveGameToFirestore(); // Attendre la fin de la sauvegarde asynchrone
+            _ = SaveGameToFirestore(); 
         }
     }
 
