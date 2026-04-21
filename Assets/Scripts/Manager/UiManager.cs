@@ -39,6 +39,10 @@ public class UIManager : MonoBehaviour
     public Slider progressBar;
     public Slider expProgressBar;
 
+    [Header("UI IAP")]
+    public GameObject iapPanel; // Le panneau parent de ton UI IAP
+    public TextMeshProUGUI iapStatusText; // Le texte pour afficher les messages (Succès/Erreur)
+
     public void Initialize()
     {
         if (instance == null)
@@ -111,6 +115,9 @@ public class UIManager : MonoBehaviour
         DistanceObjectUpgrade.UpdateUiUnlockNextTargetArrow += UpdateArrowNextPrev;
         PlayerData.OnDataChanged += UpdateGeneralUI; //Called after the player buyed an upgrade
 
+        IAPManager.OnPurchaseSuccessAction += HandlePurchaseSuccess;
+        IAPManager.OnPurchaseFailedAction += HandlePurchaseFailed;
+
     }
 
     private void OnDisable()
@@ -123,6 +130,9 @@ public class UIManager : MonoBehaviour
 
         DistanceObjectUpgrade.UpdateUiUnlockNextTargetArrow -= UpdateArrowNextPrev;
         PlayerData.OnDataChanged -= UpdateGeneralUI; //Called after the player buyed an upgrade
+
+        IAPManager.OnPurchaseSuccessAction -= HandlePurchaseSuccess;
+        IAPManager.OnPurchaseFailedAction -= HandlePurchaseFailed;
     }
 
     // Cette méthode ne devrait être appelée que lorsque les valeurs changent,
@@ -192,4 +202,35 @@ public class UIManager : MonoBehaviour
     {
         levelText.text = "Niveau: " + ConvertExpToLevel.GetLevelFromExp(StatsManager.Instance.currentPlayerData.expJoueur);
     }
+
+    // --- GESTION DES NOTIFICATIONS IAP ---
+
+    private void HandlePurchaseSuccess(string productId)
+    {
+        // 1. Afficher le message de succès
+        iapStatusText.text = $"Achat de '{productId}' réussi ! Merci pour votre soutien.";
+        
+        // 2. Activer le panneau visuel
+        iapPanel.SetActive(true);
+
+        // 3. Lancer le compte à rebours pour cacher le message
+        Invoke(nameof(HideIapPanel), 3.0f); // Cache le message après 3 secondes
+    }
+
+    private void HandlePurchaseFailed(string error)
+    {
+        // 1. Afficher le message d'erreur
+        iapStatusText.text = $"Erreur : {error}";
+        
+        // 2. Activer le panneau visuel
+        iapPanel.SetActive(true);
+
+        // 3. Lancer le compte à rebours pour cacher le message
+        Invoke(nameof(HideIapPanel), 4.0f); // On laisse 4s pour l'erreur
+    }
+
+    private void HideIapPanel()
+    {
+        iapPanel.SetActive(false);
+    }   
 }

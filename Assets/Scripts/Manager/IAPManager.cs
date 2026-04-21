@@ -4,13 +4,14 @@ using UnityEngine.Purchasing;
 
 public class IAPManager : MonoBehaviour, IStoreListener
 {
-
     #region Singleton
-    // Le pattern Singleton permet d'accéder à ce manager depuis n'importe quel autre script
-    // de manière simple et directe via 'IdleManager.instance'.
     public static IAPManager Instance;
-
     #endregion
+
+    // --- AJOUT UX : Événements publics pour notifier l'Interface Utilisateur ---
+    public static Action<string> OnPurchaseSuccessAction;
+    public static Action<string> OnPurchaseFailedAction;
+    // -------------------------------------------------------------------------
 
     private static IStoreController storeController;
     private static IExtensionProvider storeExtensionProvider;
@@ -19,6 +20,7 @@ public class IAPManager : MonoBehaviour, IStoreListener
     {
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
+        DontDestroyOnLoad(gameObject); // Optionnel : Garde le manager actif entre les scènes
 
         if (storeController == null)
         {
@@ -30,15 +32,11 @@ public class IAPManager : MonoBehaviour, IStoreListener
     {
         if (IsInitialized()) return;
 
-        // Force l'utilisation du Fake Store, même sur l'APK Android !
         var module = StandardPurchasingModule.Instance(AppStore.fake);
-        
-        // Optionnel : affiche une fausse fenêtre de confirmation d'achat Unity en jeu
         module.useFakeStoreUIMode = FakeStoreUIMode.StandardUser;
 
         var builder = ConfigurationBuilder.Instance(module);
 
-        // TODO : Ajoute tes produits ici
         builder.AddProduct("double_money", ProductType.Consumable);
         // builder.AddProduct("no_ads", ProductType.NonConsumable);
 
@@ -50,7 +48,6 @@ public class IAPManager : MonoBehaviour, IStoreListener
         return storeController != null && storeExtensionProvider != null;
     }
 
-    // Méthode à lier au(x) bouton(s) d'achat de ton UI (ex: via l'inspecteur Unity)
     public void BuyProduct(string productId)
     {
         if (IsInitialized())
@@ -64,12 +61,18 @@ public class IAPManager : MonoBehaviour, IStoreListener
             }
             else
             {
-                Debug.LogError("[IAP] Achat échoué: Produit non trouvé ou non disponible.");
+                // Retour UX : Le produit est introuvable ou indisponible
+                string errorMsg = "Produit non disponible pour le moment.";
+                Debug.LogError($"[IAP] {errorMsg}");
+                OnPurchaseFailedAction?.Invoke(errorMsg);
             }
         }
         else
         {
-            Debug.LogError("[IAP] Achat échoué: Le système n'est pas encore initialisé.");
+            // Retour UX : Le store n'est pas prêt (ex: pas de connexion)
+            string errorMsg = "Connexion au magasin en cours, veuillez patienter.";
+            Debug.LogError($"[IAP] {errorMsg}");
+            OnPurchaseFailedAction?.Invoke(errorMsg);
         }
     }
 
@@ -90,33 +93,50 @@ public class IAPManager : MonoBehaviour, IStoreListener
         Debug.LogError($"[IAP] Erreur d'initialisation : {error} - {message}");
     }
 
-    // Méthode appelée une fois que l'achat (Fake ou Réel) est validé
     public PurchaseProcessingResult ProcessPurchase(PurchaseEventArgs args)
     {
         string productId = args.purchasedProduct.definition.id;
         Debug.Log($"[IAP] Achat réussi : {productId}");
 
-        // TODO : Ajouter les récompenses ici en fonction du productId
-        if (productId == "double_money") { 
-            FindObjectOfType<StatsManager>().DoubleMoney(); 
+        if (productId == "double_money") 
+        { 
+            // Sécurité : Vérifier si le StatsManager est bien présent
+            StatsManager stats = FindObjectOfType<StatsManager>();
+            if(stats != null) stats.DoubleMoney();
+            else Debug.LogWarning("[IAP] StatsManager introuvable, récompense non distribuée.");
         }
 
-        // Indique à Unity que la transaction a été traitée avec succès
+        // --- AJOUT UX : Déclenche l'événement de succès ---
+        OnPurchaseSuccessAction?.Invoke(productId);
+
         return PurchaseProcessingResult.Complete;
     }
 
     public void OnPurchaseFailed(Product product, PurchaseFailureReason failureReason)
     {
         Debug.LogError($"[IAP] L'achat de {product.definition.id} a échoué. Raison : {failureReason}");
+        
+        // --- AJOUT UX : Traduction basique des erreurs pour le joueur ---
+        string userMessage = "Une erreur est survenue lors de l'achat.";
+        if (failureReason == PurchaseFailureReason.UserCancelled)
+        {
+            userMessage = "L'achat a été annulé.";
+        }
+        else if (failureReason == PurchaseFailureReason.PurchasingUnavailable)
+        {
+            userMessage = "Les achats intégrés sont indisponibles sur cet appareil.";
+        }
+
+        // Déclenche l'événement d'échec
+        OnPurchaseFailedAction?.Invoke(userMessage);
     }
 
     public string GetProductPrice(string productId)
     {
-        // --- MODE DEV UNIQUEMENT ---
         #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                if (productId == "double_money") return "4.99 €";
+            if (productId == "double_money") return "4.99 €";
         #endif
-        // ---------------------------
+
         if (IsInitialized())
         {
             Product product = storeController.products.WithID(productId);
@@ -125,7 +145,6 @@ public class IAPManager : MonoBehaviour, IStoreListener
                 return product.metadata.localizedPriceString;
             }
         }
-        return "Chargement..."; // Si le store n'a pas encore fini de s'initialiser
+        return "Chargement..."; 
     }
-    
 }
