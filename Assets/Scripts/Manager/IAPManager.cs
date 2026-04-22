@@ -134,7 +134,7 @@ public class IAPManager : MonoBehaviour, IStoreListener
     public string GetProductPrice(string productId)
     {
         #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            if (productId == "double_money") return "4.99 €";
+            if (productId == "double_money") return "Double Monnaie 4.99 €";
         #endif
 
         if (IsInitialized())

@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 66ed0aa1020b2c947b7e63a99d076292, type: 3}
-  m_Name: NewPrestigeUpgrade
+  m_Name: NewPrestigeUpgrade 1
   m_EditorClassIdentifier: Assembly-CSharp::PrestigeUpgradeSO
-  upgradeID: Prestige_dpc_1
+  upgradeID: Prestige_dps_1
   infoAffichage: Description de l'upgrade...
   shopCategory: 2
   levelMax: 0
   uiInfo:
-    nameText: DPC
-    descriptionText: '*2 DPC'
+    nameText: DPS
+    descriptionText: '*2 DPS'
     effectText: 
     gainText: 0
     iconImage: {fileID: 0}
@@ -32,5 +32,5 @@ MonoBehaviour:
   baseStatGain:
     mantissa: 1
     exponent: 0
-  statToAffect: 6
+  statToAffect: 7
   milestones: []
