@@ -1,7 +1,7 @@
 using UnityEngine;
 using BreakInfinity;
 using System.Collections; // Requis pour les Coroutines
-
+using UnityEngine.UI; 
 public class ClickCircleSpawner : MonoBehaviour
 {
     public static ClickCircleSpawner Instance;
@@ -10,6 +10,10 @@ public class ClickCircleSpawner : MonoBehaviour
     public RectTransform zoneApparition; 
     public float tempsEntreApparitions;
     public GameObject currentCircle;
+
+    public bool AlreadyBoosted = false;
+
+    public Button buttonBoostSpawnRate;
 
     private Vector2 rondSize;
     private Coroutine spawnCoroutine; // Référence à notre coroutine en cours
@@ -77,6 +81,14 @@ public class ClickCircleSpawner : MonoBehaviour
 
     void FaireApparaitreRond()
     {
+        //Calcul un petit pourcentage de chance d'appelé la fonction BoostSpawnRateTemporary
+        //Calcule du nombre d'apparition de cercle par seconde divisé par 10 pour obtenir une chance raisonnable
+        float spawnBoostChance = tempsEntreApparitions / 5f;
+        if (!AlreadyBoosted && Random.value < spawnBoostChance) // 10% de chance
+        {
+            ShowBoostButtonTemporary();
+        }
+
         float safeLargeur = (zoneApparition.rect.width - rondSize.x) / 2;
         float safeHauteur = (zoneApparition.rect.height - rondSize.y) / 2;
 
@@ -93,7 +105,7 @@ public class ClickCircleSpawner : MonoBehaviour
     /// Met à jour le temps d'apparition (appelé par le StatsManager
     /// lors d'un achat d'upgrade) et redémarre la coroutine.
     /// </summary>
-    public void ActualiseSpawnRate()
+    public void ActualiseSpawnRate(float? newSpawnRate = null)
     {
         tempsEntreApparitions = (float)StatsManager.Instance.GetStat(StatToAffect.SpawnRateCircle).ToDouble();
         Debug.Log($"Nouveau temps d'apparition : {tempsEntreApparitions}");
@@ -137,5 +149,43 @@ public class ClickCircleSpawner : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    public void ShowBoostButtonTemporary()
+    {
+        //Vérifie que le bouton est pas déjat actif
+        if (!buttonBoostSpawnRate.gameObject.activeSelf)
+        {
+            StartCoroutine(ShowBoostButtonCoroutine(5));
+        }
+    }
+
+    private IEnumerator ShowBoostButtonCoroutine(float duration)
+    {
+        buttonBoostSpawnRate.gameObject.SetActive(true);
+        yield return new WaitForSeconds(duration);
+        buttonBoostSpawnRate.gameObject.SetActive(false);
+    }
+
+    private IEnumerator BoostSpawnRateCoroutine(float boostAmount, float duration)
+    {
+        float originalSpawnRate = (float)StatsManager.Instance.GetStat(StatToAffect.SpawnRateCircle).ToDouble();
+        Debug.Log("Boost du Spawn Rate des cercles de clic de " + originalSpawnRate + " à " + boostAmount+ " pendant " + duration + " secondes.");
+
+        //Cache le bouton
+        buttonBoostSpawnRate.gameObject.SetActive(false);
+
+        // Appliquer le boost
+        
+        tempsEntreApparitions = boostAmount;
+        ActualiseSpawnRate(tempsEntreApparitions);
+        AlreadyBoosted = true;
+        // Attendre la durée du boost
+        yield return new WaitForSeconds(duration);
+
+        AlreadyBoosted = false;
+        // Rétablir le spawn rate original
+        tempsEntreApparitions = originalSpawnRate;
+        ActualiseSpawnRate(tempsEntreApparitions);
     }
 }

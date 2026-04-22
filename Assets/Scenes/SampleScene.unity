@@ -1219,8 +1219,8 @@ MonoBehaviour:
   spriteObjetActuelle: {fileID: 1626191887}
   progressBar: {fileID: 1426586886}
   expProgressBar: {fileID: 540706565}
-  iapPanel: {fileID: 2045203614}
-  iapStatusText: {fileID: 769534306}
+  iapPanel: {fileID: 0}
+  iapStatusText: {fileID: 0}
 --- !u!4 &116612552
 Transform:
   m_ObjectHideFlags: 0
@@ -5772,6 +5772,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a324fd1c00e35114f938033da9d0ae83, type: 2}
   - {fileID: 11400000, guid: 34cd04f992f928b49bbba38ae8c4812f, type: 2}
   - {fileID: 11400000, guid: c8fe8d9470823074a8e845d79762d02d, type: 2}
+  - {fileID: 11400000, guid: af6bd9d698417064086a56e2f09d325c, type: 2}
 --- !u!1 &1117623117
 GameObject:
   m_ObjectHideFlags: 0
@@ -9809,7 +9810,9 @@ MonoBehaviour:
   clickCirclePrefab: {fileID: 3082651474040124456, guid: c0811627db8d5e6479009e37a9f3d4ad, type: 3}
   zoneApparition: {fileID: 370537540}
   tempsEntreApparitions: 1
-  currentCircle: {fileID: 370537539}
+  currentCircle: {fileID: 0}
+  AlreadyBoosted: 0
+  buttonBoostSpawnRate: {fileID: 94387116}
 --- !u!4 &1892544981
 Transform:
   m_ObjectHideFlags: 0
