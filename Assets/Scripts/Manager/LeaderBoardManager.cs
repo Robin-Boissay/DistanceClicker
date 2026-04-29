@@ -56,24 +56,58 @@ public class LeaderboardManager : MonoBehaviour
     /// </summary>
     public async Task<List<LeaderboardEntry>> GetLeaderboard()
     {
+        List<LeaderboardEntry> currentList = new List<LeaderboardEntry>();
+
         // Vérifie si le cache est encore valide
         if (cachedLeaderboard != null && 
             (DateTime.Now - lastFetchTime).TotalMinutes < CACHE_DURATION_MINUTES)
         {
             Debug.Log("Leaderboard : Données chargées depuis le cache.");
-            return cachedLeaderboard;
+            currentList.AddRange(cachedLeaderboard);
+        }
+        else
+        {
+            // Si le cache est expiré, on va chercher les nouvelles données
+            Debug.Log("Leaderboard : Cache expiré. Récupération depuis Firestore...");
+            
+            List<LeaderboardEntry> freshData = await FetchTop10Players();
+
+            // Mettre à jour le cache et le timestamp
+            cachedLeaderboard = freshData;
+            lastFetchTime = DateTime.Now;
+
+            currentList.AddRange(cachedLeaderboard);
         }
 
-        // Si le cache est expiré, on va chercher les nouvelles données
-        Debug.Log("Leaderboard : Cache expiré. Récupération depuis Firestore...");
+        // Ajouter les agents locaux en direct
+        currentList.AddRange(GetLocalAgentsScores());
+
+        // Trier la liste fusionnée (du plus gros score au plus petit)
+        currentList.Sort((a, b) => b.currency.CompareTo(a.currency));
+
+        return currentList;
+    }
+
+    /// <summary>
+    /// Récupère les scores des agents ML locaux en direct.
+    /// </summary>
+    private List<LeaderboardEntry> GetLocalAgentsScores()
+    {
+        List<LeaderboardEntry> agentEntries = new List<LeaderboardEntry>();
+
+        // On cherche tous les environnements dans la scène active
+        GameEnvironment[] environments = FindObjectsOfType<GameEnvironment>();
         
-        List<LeaderboardEntry> freshData = await FetchTop10Players();
-
-        // Mettre à jour le cache et le timestamp
-        cachedLeaderboard = freshData;
-        lastFetchTime = DateTime.Now;
-
-        return cachedLeaderboard;
+        foreach (GameEnvironment env in environments)
+        {
+            // On ne prend que les agents non contrôlés par un joueur
+            if (env != null && !env.isPlayerControlled && env.PlayerData != null)
+            {
+                agentEntries.Add(new LeaderboardEntry(env.environmentName, env.PlayerData.monnaiePrincipale));
+            }
+        }
+        
+        return agentEntries;
     }
 
     /// <summary>
