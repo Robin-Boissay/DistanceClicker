@@ -107,8 +107,14 @@ public class ClickCircleSpawner : MonoBehaviour
     /// </summary>
     public void ActualiseSpawnRate(float? newSpawnRate = null)
     {
-        tempsEntreApparitions = (float)StatsManager.Instance.GetStat(StatToAffect.SpawnRateCircle).ToDouble();
-        Debug.Log($"Nouveau temps d'apparition : {tempsEntreApparitions}");
+        if (newSpawnRate.HasValue)
+        {
+            tempsEntreApparitions = newSpawnRate.Value;
+        }
+        else
+        {
+            tempsEntreApparitions = (float)StatsManager.Instance.GetStat(StatToAffect.SpawnRateCircle).ToDouble();
+        }
 
         // Arrêter l'ancienne coroutine (qui attendait l'ancien temps)
         if (spawnCoroutine != null)
@@ -165,6 +171,13 @@ public class ClickCircleSpawner : MonoBehaviour
         buttonBoostSpawnRate.gameObject.SetActive(true);
         yield return new WaitForSeconds(duration);
         buttonBoostSpawnRate.gameObject.SetActive(false);
+    }
+
+    // Wrapper public pour être appelé depuis l'évènement OnClick du bouton Unity
+    public void OnClickBoostButton()
+    {
+        // Lance la coroutine (modifie les valeurs 0.1f et 5f selon tes besoins)
+        StartCoroutine(BoostSpawnRateCoroutine(0.2f, 10f));
     }
 
     private IEnumerator BoostSpawnRateCoroutine(float boostAmount, float duration)

@@ -10,25 +10,25 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5ae015afb7117654588d41196e9face4, type: 3}
-  m_Name: MasteryMoleculeUpgrade
+  m_Name: MasteryKillianUpgrade
   m_EditorClassIdentifier: Assembly-CSharp::MasteryUpgrade
-  upgradeID: Mastery_molecule
+  upgradeID: Mastery_killian
   infoAffichage: Description de l'upgrade...
   shopCategory: 1
-  levelMax: 50
+  levelMax: 100
   uiInfo:
-    nameText: Mastery Molecule
+    nameText: Mastery Boss
     descriptionText: 
     effectText: '* x% vie et gain'
     gainText: 0
-    iconImage: {fileID: 21300000, guid: 65ee45e13ebccaa4780dceeb27da7384, type: 3}
+    iconImage: {fileID: 21300000, guid: 318fda7817e13984998a647325cdb4ce, type: 3}
   conditionUnlock:
     levelUnlock: 0
     upgradeDefinition: {fileID: 0}
-  targetWhereMasteryApplies: {fileID: 11400000, guid: e002fd91d6c71454a8641ad1eb27d818, type: 2}
+  targetWhereMasteryApplies: {fileID: 11400000, guid: cf6698dc200a4d44b9e4846dfba30cc1, type: 2}
   BaseCost:
-    mantissa: 1.5
-    exponent: 2
+    mantissa: 1
+    exponent: 5
   GrowthCostFactor: 1.12
-  MasteryDistanceMultiplier: 1.1
-  MasteryRewardMultiplier: 1.12
+  MasteryDistanceMultiplier: 1.11
+  MasteryRewardMultiplier: 1.14

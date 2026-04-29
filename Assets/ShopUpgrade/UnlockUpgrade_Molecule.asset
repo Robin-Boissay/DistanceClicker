@@ -21,7 +21,7 @@ MonoBehaviour:
     descriptionText: 
     effectText: 
     gainText: 0
-    iconImage: {fileID: 0}
+    iconImage: {fileID: 21300000, guid: 65ee45e13ebccaa4780dceeb27da7384, type: 3}
   conditionUnlock:
     levelUnlock: 25
     upgradeDefinition: {fileID: 11400000, guid: 036198432cd149e45856f512bfed5a82, type: 2}
