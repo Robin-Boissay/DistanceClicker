@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.UI; // Pour Button
 using System; // Requis pour utiliser les 'Action' (événements)
 using BreakInfinity;
+using TMPro;
 
 public class ShopManager : MonoBehaviour
 {
@@ -41,6 +42,10 @@ public class ShopManager : MonoBehaviour
     private List<ShopItemUI> allMasteryShopItems = new List<ShopItemUI>();
 
     private ShopCategory currentTab = ShopCategory.Global;
+
+    public TextMeshProUGUI buyAmountText;
+
+    private int BuyAmount = 1;
 
     public void Initialize()
     {
@@ -95,6 +100,18 @@ public class ShopManager : MonoBehaviour
     {
         DistanceObjectUpgrade.ChangeVisibilityUpgrade -= UpdateVisibilityUpgrade;
         PlayerData.OnDataChanged -= UpdateAllShopItemsUI;
+    }
+
+    public int getBuyAmount()
+    {
+        return BuyAmount;
+    }
+
+    public void SwitchBuyAmount()
+    {
+        BuyAmount = BuyAmount == 10 ? 1 : 10;
+        buyAmountText.text = "X " + BuyAmount;
+        this.UpdateAllShopItemsUI();
     }
     
     // --- CONTRÔLE DU PANEL PRINCIPAL ---

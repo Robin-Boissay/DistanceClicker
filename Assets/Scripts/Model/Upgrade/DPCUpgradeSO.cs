@@ -11,29 +11,24 @@ public class DPCUpgradeSO : StatsUpgrade
 {
     public override void Purchase(PlayerData data)
     {
+        int amount = ShopManager.instance.getBuyAmount();
         int currentLevel = GetLevel();
 
-        if(data.SpendCurrency(GetCurrentCost()))
+        BigDouble totalCost = 0;
+        if (growthCostFactor == 1f)
         {
-            data.IncrementUpgradeLevel(this.upgradeID);
-        }
-    }
-
-    public override BigDouble GetCurrentCost()
-    {
-        int currentLevel = GetLevel();
-        if (currentLevel >= 0)
-        {
-            // Coût = baseCost * (growthCostFactor ^ currentLevel)
-            BigDouble cost = baseCost * BigDouble.Pow(growthCostFactor, currentLevel);
-            return cost;
+            totalCost = baseCost * amount;
         }
         else
         {
-            return baseCost;
+            BigDouble firstLevelCost = baseCost * BigDouble.Pow(growthCostFactor, currentLevel);
+            totalCost = firstLevelCost * (BigDouble.Pow(growthCostFactor, amount) - 1) / (growthCostFactor - 1);
         }
 
-            
+        if(data.SpendCurrency(totalCost))
+        {
+            data.IncrementUpgradeLevel(this.upgradeID, amount);
+        }
     }
 
     public override BigDouble CalculateTotalStatValue(int currentLevel)
@@ -86,16 +81,27 @@ public class DPCUpgradeSO : StatsUpgrade
         return totalStatGain;
     }
     
-    public override bool IsRequirementsMet()
+    public override bool IsRequirementsMet(int amount = 1)
     {   
         int currentLevel = GetLevel();
 
         PlayerData data = StatsManager.Instance.currentPlayerData;
 
-        if (levelMax == 0 && GetCurrentCost() <= data.monnaiePrincipale)
+        BigDouble totalCost = 0;
+        if (growthCostFactor == 1f)
+        {
+            totalCost = baseCost * amount;
+        }
+        else
+        {
+            BigDouble firstLevelCost = baseCost * BigDouble.Pow(growthCostFactor, currentLevel);
+            totalCost = firstLevelCost * (BigDouble.Pow(growthCostFactor, amount) - 1) / (growthCostFactor - 1);
+        }
+
+        if (levelMax == 0 && totalCost <= data.monnaiePrincipale)
         {
             return true;
         }
-        return GetCurrentCost() <= data.monnaiePrincipale  && currentLevel < levelMax;
+        return totalCost <= data.monnaiePrincipale && (currentLevel + amount) <= levelMax;
     }
 }

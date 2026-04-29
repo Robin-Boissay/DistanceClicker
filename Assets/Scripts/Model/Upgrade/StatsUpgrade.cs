@@ -32,29 +32,32 @@ public abstract class StatsUpgrade : BaseGlobalUpgrade
         return currentLevel;
     }
     
-    public override BigDouble GetCurrentCost()
+    public override BigDouble GetCurrentCost(int amount = -1)
     {
+        if (amount == -1) amount = ShopManager.instance.getBuyAmount();
         int currentLevel = GetLevel();
-        if (currentLevel >= 0)
-        {
-            float totalBaseCostMultiplier = 1f;
-            foreach (BaseMilestone milestone in milestones)
-            {
-                if (currentLevel >= milestone.milestoneLevel)
-                {
-                    totalBaseCostMultiplier *= milestone.baseCostMultiplier;
-                }
-            }
 
-            // Coût = baseCost * (growthCostFactor ^ currentLevel)
-            BigDouble cost = baseCost * BigDouble.Pow(growthCostFactor, currentLevel) * totalBaseCostMultiplier;
-            return cost;
+        float totalBaseCostMultiplier = 1f;
+        foreach (BaseMilestone milestone in milestones)
+        {
+            if (currentLevel >= milestone.milestoneLevel)
+            {
+                totalBaseCostMultiplier *= milestone.baseCostMultiplier;
+            }
+        }
+
+        BigDouble totalCost = 0;
+        if (growthCostFactor == 1f)
+        {
+            totalCost = baseCost * totalBaseCostMultiplier * amount;
         }
         else
         {
-            return baseCost;
+            BigDouble firstLevelCost = baseCost * BigDouble.Pow(growthCostFactor, currentLevel) * totalBaseCostMultiplier;
+            totalCost = firstLevelCost * (BigDouble.Pow(growthCostFactor, amount) - 1) / (growthCostFactor - 1);
         }
-
+        
+        return totalCost;
     }
     public BigDouble GetStatBonusForLevel(int level)
     {

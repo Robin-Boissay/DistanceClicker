@@ -30,6 +30,7 @@ public class ShopItemUI : MonoBehaviour
         // Lier le clic du bouton
         purchaseButton.onClick.AddListener(OnPurchaseClicked);
 
+
         // S'abonner aux mises à jour (pour le coût, le niveau, etc.)
         StatsManager.Instance.OnStatsUpdated += RefreshUI;
         // On rafraîchit aussi si la monnaie change
@@ -53,6 +54,12 @@ public class ShopItemUI : MonoBehaviour
                 effectText.text = " SpawnRate -= " + currentStatUpgrade.baseStatGain.GetMantissa().ToString("F2") + "s";
             else if(currentStatUpgrade.statToAffect == StatToAffect.EnchenteurMultiplier)
                 effectText.text = " Damage multiplier += " + currentStatUpgrade.baseStatGain.GetMantissa().ToString("F2") + "%";
+            else if(currentStatUpgrade.statToAffect == StatToAffect.PrestigeDPSMultiplier){
+                effectText.text = "DPS * " + (StatsManager.Instance.GetStat(StatToAffect.PrestigeDPSMultiplier)) + " -> " + ((StatsManager.Instance.GetStat(StatToAffect.PrestigeDPSMultiplier) + (currentStatUpgrade.baseStatGain * ShopManager.instance.getBuyAmount()))) + ""; 
+            }
+            else if(currentStatUpgrade.statToAffect == StatToAffect.PrestigeDPCMultiplier){
+                effectText.text = "DPC * " + (StatsManager.Instance.GetStat(StatToAffect.PrestigeDPCMultiplier)) + " -> " + ((StatsManager.Instance.GetStat(StatToAffect.PrestigeDPCMultiplier) + (currentStatUpgrade.baseStatGain * ShopManager.instance.getBuyAmount()))) + ""; 
+            }
             else{
                 effectText.text += NumberFormatter.Format(currentStatUpgrade.baseStatGain);
             }
@@ -118,6 +125,7 @@ public class ShopItemUI : MonoBehaviour
             if(currentUpgrade.GetLevel() >= currentUpgrade.levelMax)
             {
                 levelText.text = $"Lvl. MAX";
+                costText.text = "";
             }
             else
             {
@@ -128,7 +136,7 @@ public class ShopItemUI : MonoBehaviour
         
         // Gérer l'état du bouton
         bool canAfford = playerData.monnaiePrincipale >= cost;
-        bool prerequisitesMet = currentUpgrade.IsRequirementsMet();
+        bool prerequisitesMet = currentUpgrade.IsRequirementsMet(ShopManager.instance.getBuyAmount());
 
         if (currentUpgrade.uiInfo.gainText && currentUpgrade is StatsUpgrade currentStatUpgrade)
         {
@@ -149,9 +157,11 @@ public class ShopItemUI : MonoBehaviour
             }
             else if(currentStatUpgrade.statToAffect == StatToAffect.PrestigeDPSMultiplier){
                 canAfford = playerData.prestigeCurrency >= cost;
+                effectText.text = "DPS * " + (StatsManager.Instance.GetStat(StatToAffect.PrestigeDPSMultiplier)) + " -> " + ((StatsManager.Instance.GetStat(StatToAffect.PrestigeDPSMultiplier) + (currentStatUpgrade.baseStatGain * ShopManager.instance.getBuyAmount()))) + ""; 
             }
             else if(currentStatUpgrade.statToAffect == StatToAffect.PrestigeDPCMultiplier){
                 canAfford = playerData.prestigeCurrency >= cost;
+                effectText.text = "DPC * " + (StatsManager.Instance.GetStat(StatToAffect.PrestigeDPCMultiplier)) + " -> " + ((StatsManager.Instance.GetStat(StatToAffect.PrestigeDPCMultiplier) + (currentStatUpgrade.baseStatGain * ShopManager.instance.getBuyAmount()))) + ""; 
             }
         }
 
@@ -192,8 +202,9 @@ public class ShopItemUI : MonoBehaviour
     private void OnPurchaseClicked()
     {
         playerData = StatsManager.Instance.currentPlayerData;
-        if (currentUpgrade.IsRequirementsMet())
+        if (currentUpgrade.IsRequirementsMet(ShopManager.instance.getBuyAmount()))
         {
+            Debug.Log("Requirement met for 10 upgrades" );
             currentUpgrade.Purchase(playerData);
         }
     }

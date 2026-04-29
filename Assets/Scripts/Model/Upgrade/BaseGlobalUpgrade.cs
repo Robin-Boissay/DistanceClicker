@@ -29,14 +29,14 @@ public abstract class BaseGlobalUpgrade : ScriptableObject
     /// <summary>
     /// Calcule le coût actuel basé sur le niveau dans PlayerData.
     /// </summary>
-    public abstract BigDouble GetCurrentCost();
+    public abstract BigDouble GetCurrentCost(int amount = -1);
 
     /// <summary>
     /// Logique d'achat. C'est ici que l'upgrade modifie PlayerData.
     /// </summary>
     public abstract void Purchase(PlayerData data);
 
-    public abstract bool IsRequirementsMet();
+    public abstract bool IsRequirementsMet(int amount = 1);
 
     public bool GetIsShown()
     {

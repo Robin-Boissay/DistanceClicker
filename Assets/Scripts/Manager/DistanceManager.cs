@@ -191,6 +191,11 @@ public class DistanceManager : MonoBehaviour
             }    
     }
 
+    public void ActualiseTargetAfterPrestige()
+    {
+        SetupToMaxTargetAvaible();
+    }
+
     public DistanceObjectSO GetCurrentTarget()
     {
         return cibleActuelle;

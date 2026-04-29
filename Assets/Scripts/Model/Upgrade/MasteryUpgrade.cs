@@ -18,17 +18,32 @@ public class MasteryUpgrade : BaseMasteryUpgrade
 
     public override void Purchase(PlayerData data)
     {
-        int currentLevel = GetLevel();
-        if(data.SpendCurrency(GetCurrentCost()))
+        int amount = ShopManager.instance.getBuyAmount();
+        
+        if(data.SpendCurrency(GetCurrentCost(amount)))
         {
-            data.IncrementUpgradeLevel(this.upgradeID);
+            data.IncrementUpgradeLevel(this.upgradeID, amount);
             DistanceManager.instance.ActualiseTargetAfterShopMasteryBuyed();
         }
     }
 
-    public override BigDouble GetCurrentCost()
+    public override BigDouble GetCurrentCost(int amount = -1)
     {
-        return BaseCost * BigDouble.Pow(GrowthCostFactor, GetLevel());
+        if (amount == -1) amount = ShopManager.instance.getBuyAmount();
+        int currentLevel = GetLevel();
+
+        BigDouble totalCost = 0;
+        if (GrowthCostFactor == 1f)
+        {
+            totalCost = BaseCost * amount;
+        }
+        else
+        {
+            BigDouble firstLevelCost = BaseCost * BigDouble.Pow(GrowthCostFactor, currentLevel);
+            totalCost = firstLevelCost * (BigDouble.Pow(GrowthCostFactor, amount) - 1) / (GrowthCostFactor - 1);
+        }
+        
+        return totalCost;
     }
 
     public override int GetLevel()
@@ -38,9 +53,9 @@ public class MasteryUpgrade : BaseMasteryUpgrade
         return currentLevel;
     }
 
-    public override bool IsRequirementsMet()
+    public override bool IsRequirementsMet(int amount = 1)
     {
-        if (GetLevel() >= levelMax)
+        if (levelMax > 0 && GetLevel() + amount > levelMax)
         {
             return false;
         }

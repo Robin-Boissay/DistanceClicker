@@ -77,8 +77,8 @@ public class PrestigeManager : MonoBehaviour
         StatsManager.Instance.RecalculateAllStats();
         
         // Mettre à jour l'UI
-        //UIManager.instance.UpdateAllUI(); // Méthode hypothétique
-        
+        UIManager.instance.ActualiseTargetInfos(); // actualise target and stats infos
+        DistanceManager.instance.ActualiseTargetAfterPrestige();
         // Reset visuel du spawner
         //GameManager.instance.clickCircleSpawner.ResetSpawner();
 

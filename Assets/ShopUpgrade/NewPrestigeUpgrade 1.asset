@@ -20,7 +20,7 @@ MonoBehaviour:
     nameText: DPS
     descriptionText: '*2 DPS'
     effectText: 
-    gainText: 0
+    gainText: 1
     iconImage: {fileID: 0}
   conditionUnlock:
     levelUnlock: 0

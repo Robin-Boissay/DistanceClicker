@@ -65,11 +65,11 @@ public class PlayerData
     /// Augmente le niveau d'une upgrade et notifie le système.
     /// C'est ce que 'Purchase()' de ton upgrade appellera.
     /// </summary>
-    public void IncrementUpgradeLevel(string upgradeID)
+    public void IncrementUpgradeLevel(string upgradeID, int amount = 1)
     {
         EnsureUpgradeDict();
         int currentLevel = GetUpgradeLevel(upgradeID);
-        upgradeLevels[upgradeID] = currentLevel + 1;
+        upgradeLevels[upgradeID] = currentLevel + amount;
         NotifyChange(); // On prévient le StatsManager !
     }
     

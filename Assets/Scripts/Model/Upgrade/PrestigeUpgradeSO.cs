@@ -11,11 +11,23 @@ public class PrestigeUpgradeSO : StatsUpgrade
 {
     public override void Purchase(PlayerData data)
     {
+        int amount = ShopManager.instance.getBuyAmount();
         int currentLevel = GetLevel();
 
-        if(data.SpendPrestigeCurrency(GetCurrentCost()))
+        BigDouble totalCost = 0;
+        if (growthCostFactor == 1f)
         {
-            data.IncrementUpgradeLevel(this.upgradeID);
+            totalCost = baseCost * amount;
+        }
+        else
+        {
+            BigDouble firstLevelCost = baseCost * BigDouble.Pow(growthCostFactor, currentLevel);
+            totalCost = firstLevelCost * (BigDouble.Pow(growthCostFactor, amount) - 1) / (growthCostFactor - 1);
+        }
+
+        if(data.SpendPrestigeCurrency(totalCost))
+        {
+            data.IncrementUpgradeLevel(this.upgradeID, amount);
         }
     }
 
@@ -25,16 +37,26 @@ public class PrestigeUpgradeSO : StatsUpgrade
         return currentLevel * baseStatGain;
     }
 
-    public override bool IsRequirementsMet()
+    public override bool IsRequirementsMet(int amount = 1)
     {   
         int currentLevel = GetLevel();
 
         PlayerData data = StatsManager.Instance.currentPlayerData;
-        if (levelMax == 0 && GetCurrentCost() <= data.prestigeCurrency)
+        BigDouble totalCost = 0;
+        if (growthCostFactor == 1f)
         {
+            totalCost = baseCost * amount;
+        }
+        else
+        {
+            BigDouble firstLevelCost = baseCost * BigDouble.Pow(growthCostFactor, currentLevel);
+            totalCost = firstLevelCost * (BigDouble.Pow(growthCostFactor, amount) - 1) / (growthCostFactor - 1);
+        }
 
+        if (levelMax == 0 && totalCost <= data.prestigeCurrency)
+        {
             return true;
         }
-        return GetCurrentCost() <= data.prestigeCurrency  && currentLevel < levelMax;
+        return totalCost <= data.prestigeCurrency && (currentLevel + amount) <= levelMax;
     }
 }

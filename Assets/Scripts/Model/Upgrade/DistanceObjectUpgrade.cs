@@ -28,7 +28,7 @@ public class DistanceObjectUpgrade : BaseMasteryUpgrade
             UpdateUiUnlockNextTargetArrow?.Invoke();
         }
     }
-    public override BigDouble GetCurrentCost()
+    public override BigDouble GetCurrentCost(int amount = -1)
     {
         return Cost;
     }
@@ -40,7 +40,7 @@ public class DistanceObjectUpgrade : BaseMasteryUpgrade
         return currentLevel;
     }
 
-    public override bool IsRequirementsMet()
+    public override bool IsRequirementsMet(int amount = 1)
     {
         if (GetLevel() >= levelMax)
         {
