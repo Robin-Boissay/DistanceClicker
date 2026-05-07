@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using UnityEngine.UI; // Pour Button
 public class ProfileSettingManager : MonoBehaviour
 {
+    public static ProfileSettingManager Instance { get; private set; }
+
     [Header("UI References")]
     public TMP_InputField inputPseudo;
     public TextMeshProUGUI textFeedback;
@@ -21,6 +23,20 @@ public class ProfileSettingManager : MonoBehaviour
     
     private FirebaseAuth auth;
     private FirebaseFirestore dbReference; // Référence à la base de données
+
+    void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+            
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     public void Initialize()
     {
@@ -126,6 +142,10 @@ public class ProfileSettingManager : MonoBehaviour
 
     public void ToggleSettings()
     {
+        if(LeaderboardManager.Instance.IsLeaderboardOpen()){
+            LeaderboardManager.Instance.ToggleLeaderBoard();
+        }
+        
         if (settingboardAnimator == null) return;
         isSettingboardOpen = !isSettingboardOpen;
 
@@ -139,5 +159,9 @@ public class ProfileSettingManager : MonoBehaviour
             Debug.Log("Fermeture des settings");
             settingboardAnimator.SetTrigger("CloseSettings");
         }
+    }
+
+    public bool IsSettingsOpen(){
+        return isSettingboardOpen;
     }
 }

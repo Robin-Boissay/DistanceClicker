@@ -83,7 +83,7 @@ public class ClickCircleSpawner : MonoBehaviour
     {
         //Calcul un petit pourcentage de chance d'appelé la fonction BoostSpawnRateTemporary
         //Calcule du nombre d'apparition de cercle par seconde divisé par 10 pour obtenir une chance raisonnable
-        float spawnBoostChance = tempsEntreApparitions / 5f;
+        float spawnBoostChance = tempsEntreApparitions / 30f;
         if (!AlreadyBoosted && Random.value < spawnBoostChance) // 10% de chance
         {
             ShowBoostButtonTemporary();

@@ -17,10 +17,10 @@ MonoBehaviour:
   icone: {fileID: 21300000, guid: 60bacae7da5d67b44b8c78d5245f752c, type: 3}
   description: 
   distanceTotale:
-    mantissa: 1
+    mantissa: 5
     exponent: 0
   recompenseEnMonnaie:
-    mantissa: 8
-    exponent: -1
+    mantissa: 2
+    exponent: 0
   objetSuivant: {fileID: 11400000, guid: 868d53f3e26314f4283e5f0f7f2a55e0, type: 2}
   objetPrecedent: {fileID: 0}

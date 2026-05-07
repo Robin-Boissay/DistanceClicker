@@ -283,6 +283,6 @@ public class ShopManager : MonoBehaviour
     {
         Debug.Log($"Mise à jour de la visibilité de l'upgrade {upgrade.upgradeID} : isShown = {upgrade.GetIsShown()}");
         ShopCategory category = upgrade.shopCategory;
-        GetShopItemUIByID(upgrade.upgradeID).gameObject.SetActive(upgrade.GetIsShown());
+        //GetShopItemUIByID(upgrade.upgradeID).gameObject.SetActive(upgrade.GetIsShown());
     }
 }

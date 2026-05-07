@@ -4827,8 +4827,8 @@ RectTransform:
   - {fileID: 410215311}
   m_Father: {fileID: 1914736934}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1.02, y: 0.02}
-  m_AnchorMax: {x: 1.98, y: 0.89}
+  m_AnchorMin: {x: 1.02, y: -0.02}
+  m_AnchorMax: {x: 1.98, y: 0.85}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -5572,7 +5572,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 49.05
+  m_fontSize: 51.4
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -5866,7 +5866,7 @@ RectTransform:
   - {fileID: 1474772394}
   m_Father: {fileID: 1914736934}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: -0.98, y: 0.02}
+  m_AnchorMin: {x: -0.98, y: -0.02}
   m_AnchorMax: {x: -0.02, y: 0.85}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
@@ -6154,8 +6154,8 @@ MonoBehaviour:
     prestigeCount: 0
   allUpgradesDatabase:
   - {fileID: 11400000, guid: 36de4dccd681d8540a6610d3d04c6f86, type: 2}
-  - {fileID: 11400000, guid: f97abc95900387848a407eb59ae324a8, type: 2}
   - {fileID: 11400000, guid: 7d2d446bc66deff4dbe110cdfc2302db, type: 2}
+  - {fileID: 11400000, guid: f97abc95900387848a407eb59ae324a8, type: 2}
   - {fileID: 11400000, guid: 9064e059d81c1f549a6ce30bcd55bb47, type: 2}
   - {fileID: 11400000, guid: 5e4416358979e834a860afd6b450969d, type: 2}
   - {fileID: 11400000, guid: 9957942ce5a9b0c4fb77862eee0299b5, type: 2}
@@ -9655,7 +9655,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 70.65
+  m_fontSize: 72
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1

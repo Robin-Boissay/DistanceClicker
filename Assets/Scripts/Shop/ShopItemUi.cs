@@ -184,18 +184,35 @@ public class ShopItemUI : MonoBehaviour
         }
 
         
-        
-
         purchaseButton.interactable = canAfford && prerequisitesMet;
+
 
         //Debug.Log($"Mise à jour de l'UI pour l'upgrade {currentUpgrade.GetIsShown()}}}");
 
-         if (this.GetCurrentUpgrade() is BaseMasteryUpgrade distanceUpgrade)
+        if (this.GetCurrentUpgrade() is BaseMasteryUpgrade masteryUpgrade)
         {
             // Si oui, on vérifie si elle s'applique à la cible active (en utilisant le paramètre)
-            bool shouldBeActive = distanceUpgrade.targetWhereMasteryApplies == DistanceManager.instance.GetCurrentTarget() && distanceUpgrade.GetIsShown();
+            bool shouldBeActive = masteryUpgrade.targetWhereMasteryApplies == DistanceManager.instance.GetCurrentTarget();
             this.gameObject.SetActive(shouldBeActive);
+            if (this.GetCurrentUpgrade() is DistanceObjectUpgrade distanceUpgrade){
+                //Vérifie si l'upgrade est niveau max donc débloqué
+                if(this.GetCurrentUpgrade().levelMax != 0 && this.GetCurrentUpgrade().GetLevel() >= this.GetCurrentUpgrade().levelMax){
+                    this.gameObject.SetActive(false);
+                }
+                else{
+                    canAfford = shouldBeActive && distanceUpgrade.GetIsShown();
+                }
+
+                if (!canAfford){
+                    effectText.text = "Need mastery level: " + distanceUpgrade.GetLevelCondition().ToString() ;
+                }
+                purchaseButton.interactable = canAfford && prerequisitesMet;
+            }
+
+            
         }
+
+
     }
 
     // --- 3. Gestion du Clic ---

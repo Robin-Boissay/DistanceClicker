@@ -171,6 +171,10 @@ public class LeaderboardManager : MonoBehaviour
 
     public void ToggleLeaderBoard()
     {
+        if(ProfileSettingManager.Instance.IsSettingsOpen()){
+            ProfileSettingManager.Instance.ToggleSettings();
+        }
+        
         if (leaderboardAnimator == null) return;
         isLeaderboardOpen = !isLeaderboardOpen;
 
@@ -184,5 +188,9 @@ public class LeaderboardManager : MonoBehaviour
             Debug.Log("Fermeture du leaderboard");
             leaderboardAnimator.SetTrigger("CloseLeaderboard");
         }
+    }
+
+    public bool IsLeaderboardOpen(){
+        return isLeaderboardOpen;
     }
 }

@@ -28,7 +28,7 @@ MonoBehaviour:
   baseCost:
     mantissa: 1
     exponent: 0
-  growthCostFactor: 1.05
+  growthCostFactor: 1.2
   baseStatGain:
     mantissa: 2
     exponent: -2
@@ -37,6 +37,6 @@ MonoBehaviour:
   - milestoneLevel: 10
     baseCostMultiplier: 1.5
     statBonusMultiplier: 2
-  - milestoneLevel: 15
+  - milestoneLevel: 20
     baseCostMultiplier: 1.5
     statBonusMultiplier: 2

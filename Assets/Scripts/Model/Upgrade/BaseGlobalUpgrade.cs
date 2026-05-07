@@ -55,4 +55,13 @@ public abstract class BaseGlobalUpgrade : ScriptableObject
     }
     
     public abstract int GetLevel();
+
+    public int GetLevelCondition()
+    {
+        if (conditionUnlock == null)
+        {
+            return 0;
+        }
+        return conditionUnlock.levelUnlock;
+    }
 }
