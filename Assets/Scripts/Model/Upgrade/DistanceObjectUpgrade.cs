@@ -20,7 +20,9 @@ public class DistanceObjectUpgrade : BaseMasteryUpgrade
 
     public override void Purchase(PlayerData data)
     {
-        int currentLevel = GetLevel();
+        int amount = ShopManager.instance.GetBuyAmountForUpgrade(this);
+        if (amount <= 0) return;
+        
         if(data.SpendCurrency(GetCurrentCost()))
         {
             data.IncrementUpgradeLevel("unlock_object_" + targetDistanceObjectToUnlock.distanceObjectId);
@@ -40,12 +42,15 @@ public class DistanceObjectUpgrade : BaseMasteryUpgrade
         return currentLevel;
     }
 
-    public override bool IsRequirementsMet(int amount = 1)
+    public override BigDouble GetPlayerCurrency(PlayerData data)
     {
-        if (GetLevel() >= levelMax)
-        {
-            return false;
-        }
-        return true;
+        return data.monnaiePrincipale;
+    }
+
+    public override int GetMaxAffordableAmount(PlayerData data)
+    {
+        if (GetLevel() >= levelMax) return 0;
+        if (GetPlayerCurrency(data) >= Cost) return 1;
+        return 0;
     }
 }

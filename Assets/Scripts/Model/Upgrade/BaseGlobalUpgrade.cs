@@ -36,7 +36,25 @@ public abstract class BaseGlobalUpgrade : ScriptableObject
     /// </summary>
     public abstract void Purchase(PlayerData data);
 
-    public abstract bool IsRequirementsMet(int amount = 1);
+    /// <summary>
+    /// Renvoie la quantité d'argent possédée par le joueur pour cette devise spécifique.
+    /// </summary>
+    public abstract BigDouble GetPlayerCurrency(PlayerData data);
+
+    /// <summary>
+    /// Calcule le nombre maximal d'améliorations achetables avec l'argent actuel du joueur.
+    /// </summary>
+    public abstract int GetMaxAffordableAmount(PlayerData data);
+
+    public virtual bool IsRequirementsMet(int amount = -1)
+    {
+        if (amount == -1) amount = ShopManager.instance.GetBuyAmountForUpgrade(this);
+        if (amount == 0) return false;
+        if (levelMax > 0 && GetLevel() + amount > levelMax) return false;
+        
+        BigDouble cost = GetCurrentCost(amount);
+        return cost <= GetPlayerCurrency(StatsManager.Instance.currentPlayerData);
+    }
 
     public bool GetIsShown()
     {

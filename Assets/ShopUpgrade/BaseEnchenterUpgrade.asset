@@ -22,6 +22,11 @@ MonoBehaviour:
     effectText: 
     gainText: 1
     iconImage: {fileID: 21300000, guid: ecc634ec0e784f949be36075ff4d36c7, type: 3}
+    customPrefab: {fileID: 3759404868727501060, guid: 93c16258d3b607fada8dcb4623a8989b, type: 3}
+    useCustomBackgroundColor: 0
+    backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+    useCustomTextColor: 0
+    textColor: {r: 0.7924528, g: 0, b: 0.6024185, a: 0.85882354}
   conditionUnlock:
     levelUnlock: 0
     upgradeDefinition: {fileID: 0}

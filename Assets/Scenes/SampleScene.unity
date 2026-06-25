@@ -565,7 +565,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 43.95
+  m_fontSize: 46.75
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -3292,7 +3292,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 57.45
+  m_fontSize: 54.05
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -4068,7 +4068,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 47.05
+  m_fontSize: 45.35
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -5118,7 +5118,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 44.9
+  m_fontSize: 47.75
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -5572,7 +5572,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 51.4
+  m_fontSize: 48.35
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -6163,12 +6163,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 036198432cd149e45856f512bfed5a82, type: 2}
   - {fileID: 11400000, guid: 8d73c0e41a59acb41bea80e4289da201, type: 2}
   - {fileID: 11400000, guid: e6a810a770ead8a46ae000757a5c9541, type: 2}
+  - {fileID: 11400000, guid: ab78256b44e9dff6583fdc3d234a87fd, type: 2}
   - {fileID: 11400000, guid: f254f8b284aaded4e9d986deef0ecdfe, type: 2}
   - {fileID: 11400000, guid: 595754a1792779c4eab7bccae4cf1188, type: 2}
   - {fileID: 11400000, guid: fecc0cee51674874ca756013ac27556e, type: 2}
   - {fileID: 11400000, guid: cdfe6e46ee9548f4e8dfbce51df29d42, type: 2}
   - {fileID: 11400000, guid: a324fd1c00e35114f938033da9d0ae83, type: 2}
   - {fileID: 11400000, guid: 22fb7fd3fd3ef684fba2ee2b389868e2, type: 2}
+  - {fileID: 11400000, guid: 9b0535a4cfb17e850b5c9646851c7cf5, type: 2}
   - {fileID: 11400000, guid: 34cd04f992f928b49bbba38ae8c4812f, type: 2}
   - {fileID: 11400000, guid: c8fe8d9470823074a8e845d79762d02d, type: 2}
   - {fileID: 11400000, guid: af6bd9d698417064086a56e2f09d325c, type: 2}
@@ -9473,7 +9475,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 57.15
+  m_fontSize: 53.75
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -9655,7 +9657,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 72
+  m_fontSize: 69.65
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1

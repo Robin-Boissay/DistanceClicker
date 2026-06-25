@@ -88,7 +88,8 @@ public class UIManager : MonoBehaviour
             {
                 Debug.Log("Panneau trouvé pour la catégorie : " + upgradeSO.shopCategory);
                 // 5. Instancier le bouton dans le bon panneau
-                GameObject itemGO = Instantiate(shopItemPrefab, targetPanel);
+                GameObject prefabToUse = (upgradeSO.uiInfo != null && upgradeSO.uiInfo.customPrefab != null) ? upgradeSO.uiInfo.customPrefab : shopItemPrefab;
+                GameObject itemGO = Instantiate(prefabToUse, targetPanel);
 
                 // 5.b Informer le ShopManager de cette nouvelle instance, a pour effet d'ajouter l'item à la liste de gestion
                 ShopManager.instance.InstantiateItem(upgradeSO, itemGO.GetComponent<ShopItemUI>());
@@ -233,4 +234,78 @@ public class UIManager : MonoBehaviour
     {
         iapPanel.SetActive(false);
     }   
+
+    public void SortShopItems()
+    {
+        if (tabMap == null) return;
+
+        foreach (var kvp in tabMap)
+        {
+            Transform targetPanel = kvp.Value;
+            if (targetPanel == null) continue;
+
+            List<ShopItemUI> items = new List<ShopItemUI>();
+            foreach (Transform child in targetPanel)
+            {
+                ShopItemUI ui = child.GetComponent<ShopItemUI>();
+                if (ui != null)
+                {
+                    items.Add(ui);
+                }
+            }
+
+            items.Sort((a, b) =>
+            {
+                BaseGlobalUpgrade aUpgrade = a.GetCurrentUpgrade();
+                BaseGlobalUpgrade bUpgrade = b.GetCurrentUpgrade();
+
+                // 1. Forcer l'amélioration d'EXP (EnchenteurMultiplier) tout en haut
+                StatsUpgrade aStats = aUpgrade as StatsUpgrade;
+                StatsUpgrade bStats = bUpgrade as StatsUpgrade;
+
+                bool aIsExp = aStats != null && aStats.statToAffect == StatToAffect.EnchenteurMultiplier;
+                bool bIsExp = bStats != null && bStats.statToAffect == StatToAffect.EnchenteurMultiplier;
+
+                if (aIsExp && !bIsExp) return -1;
+                if (!aIsExp && bIsExp) return 1;
+
+                // 2. Les niveaux max vont tout en bas
+                bool aIsMaxLevel = aUpgrade.levelMax != 0 && aUpgrade.GetLevel() >= aUpgrade.levelMax;
+                bool bIsMaxLevel = bUpgrade.levelMax != 0 && bUpgrade.GetLevel() >= bUpgrade.levelMax;
+
+                if (aIsMaxLevel && !bIsMaxLevel) return 1;
+                if (!aIsMaxLevel && bIsMaxLevel) return -1;
+                if (aIsMaxLevel && bIsMaxLevel) return 0; // Si les deux sont max, on les laisse tels quels
+
+                bool aAffordable = a.purchaseButton.interactable;
+                bool bAffordable = b.purchaseButton.interactable;
+
+                if (aAffordable && !bAffordable) return -1;
+                if (!aAffordable && bAffordable) return 1;
+
+                BigDouble aCost = aUpgrade.GetCurrentCost();
+                BigDouble bCost = bUpgrade.GetCurrentCost();
+
+                if (aAffordable)
+                {
+                    // Achetables : du plus cher au moins cher
+                    if (aCost > bCost) return -1;
+                    if (aCost < bCost) return 1;
+                    return 0;
+                }
+                else
+                {
+                    // Non achetables : du moins cher au plus cher
+                    if (aCost < bCost) return -1;
+                    if (aCost > bCost) return 1;
+                    return 0;
+                }
+            });
+
+            for (int i = 0; i < items.Count; i++)
+            {
+                items[i].transform.SetSiblingIndex(i);
+            }
+        }
+    }
 }

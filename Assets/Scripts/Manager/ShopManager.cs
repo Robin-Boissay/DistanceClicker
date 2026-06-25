@@ -43,9 +43,14 @@ public class ShopManager : MonoBehaviour
 
     private ShopCategory currentTab = ShopCategory.Global;
 
+    public enum BuyMode { One, Ten, Max }
+    private BuyMode currentBuyMode = BuyMode.One;
     public TextMeshProUGUI buyAmountText;
 
-    private int BuyAmount = 1;
+    public BuyMode GetCurrentBuyMode()
+    {
+        return currentBuyMode;
+    }
 
     public void Initialize()
     {
@@ -102,15 +107,48 @@ public class ShopManager : MonoBehaviour
         PlayerData.OnDataChanged -= UpdateAllShopItemsUI;
     }
 
-    public int getBuyAmount()
+    public int GetBuyAmountForUpgrade(BaseGlobalUpgrade upgrade)
     {
-        return BuyAmount;
+        int currentLevel = upgrade.GetLevel();
+        
+        if (currentBuyMode == BuyMode.One)
+        {
+            if (upgrade.levelMax > 0 && currentLevel >= upgrade.levelMax) return 0;
+            return 1;
+        }
+        else if (currentBuyMode == BuyMode.Ten)
+        {
+            if (upgrade.levelMax > 0)
+            {
+                return Mathf.Max(0, Mathf.Min(10, upgrade.levelMax - currentLevel));
+            }
+            return 10;
+        }
+        else // BuyMode.Max
+        {
+            if (upgrade.levelMax > 0 && currentLevel >= upgrade.levelMax) return 0;
+            int maxAffordable = upgrade.GetMaxAffordableAmount(StatsManager.Instance.currentPlayerData);
+            return Mathf.Max(1, maxAffordable);
+        }
     }
 
     public void SwitchBuyAmount()
     {
-        BuyAmount = BuyAmount == 10 ? 1 : 10;
-        buyAmountText.text = "X " + BuyAmount;
+        if (currentBuyMode == BuyMode.One)
+        {
+            currentBuyMode = BuyMode.Ten;
+            buyAmountText.text = "X 10";
+        }
+        else if (currentBuyMode == BuyMode.Ten)
+        {
+            currentBuyMode = BuyMode.Max;
+            buyAmountText.text = "MAX";
+        }
+        else
+        {
+            currentBuyMode = BuyMode.One;
+            buyAmountText.text = "X 1";
+        }
         this.UpdateAllShopItemsUI();
     }
     
@@ -235,6 +273,11 @@ public class ShopManager : MonoBehaviour
         {
             // UpdateUI() devrait s'en charger lui-même.
             itemUI.RefreshUI();
+        }
+
+        if (UIManager.instance != null)
+        {
+            UIManager.instance.SortShopItems();
         }
     }
 
